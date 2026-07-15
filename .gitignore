@@ -10,7 +10,8 @@ data/
 # Personal financial analysis written by Claude - real net worth, holdings,
 # and account details. Never publish this; see ai_overview.example.html for
 # the generic, shareable version of what this file looks like.
-dashboard/ai_overview.html
+dashboard/ai_overview.en.html
+dashboard/ai_overview.fr.html
 dashboard.html
 
 # Python

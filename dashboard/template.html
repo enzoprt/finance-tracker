@@ -76,6 +76,13 @@
   .refresh-btn:active { background: var(--wash); }
   .refresh-status { font-size: 12px; color: var(--text-muted); margin: 8px 0 0; min-height: 14px; }
 
+  .lang-toggle { display: flex; gap: 6px; margin: 0 0 14px; }
+  .lang-btn {
+    font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 8px;
+    border: 1px solid var(--border); background: transparent; color: var(--text-secondary); cursor: pointer;
+  }
+  .lang-btn.active { background: var(--series-1); color: #ffffff; border-color: var(--series-1); }
+
   .tabs {
     display: flex; gap: 4px; margin: 18px 0 14px; overflow-x: auto;
     border-bottom: 1px solid var(--gridline); padding-bottom: 1px;
@@ -327,7 +334,16 @@
 </div>
 
 <div class="page" id="page-ai-overview">
-__AI_OVERVIEW__
+  <div class="lang-toggle">
+    <button class="lang-btn active" data-lang="en">EN</button>
+    <button class="lang-btn" data-lang="fr">FR</button>
+  </div>
+  <div id="ai-overview-en">
+__AI_OVERVIEW_EN__
+  </div>
+  <div id="ai-overview-fr" style="display:none">
+__AI_OVERVIEW_FR__
+  </div>
 </div>
 
 <script>
@@ -383,6 +399,16 @@ document.querySelectorAll('.info-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const panel = document.querySelector(`[data-info-panel="${btn.dataset.info}"]`);
     panel.classList.toggle('open');
+  });
+});
+
+/* ---------- AI Overview language toggle ---------- */
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('ai-overview-en').style.display = btn.dataset.lang === 'en' ? '' : 'none';
+    document.getElementById('ai-overview-fr').style.display = btn.dataset.lang === 'fr' ? '' : 'none';
   });
 });
 

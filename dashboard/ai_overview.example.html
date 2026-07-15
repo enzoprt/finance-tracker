@@ -8,10 +8,11 @@
     plus your real broker/account structure and write it up.
   </p>
   <p class="hero-sub" style="line-height:1.6; margin-top:10px">
-    <strong>This file (<code>dashboard/ai_overview.html</code>) is gitignored</strong> because
-    it contains real personal financial data once written - this
-    <code>ai_overview.example.html</code> file is the generic placeholder that ships in the
-    repo instead, so the project structure makes sense without leaking anyone's actual
+    <strong>The two real content files
+    (<code>dashboard/ai_overview.en.html</code> and <code>dashboard/ai_overview.fr.html</code>)
+    are gitignored</strong> because they contain real personal financial data once written -
+    this <code>ai_overview.example.html</code> file is the generic placeholder that ships in
+    the repo instead, so the project structure makes sense without leaking anyone's actual
     numbers.
   </p>
 </div>
@@ -21,11 +22,15 @@
   <p style="line-height:1.7">
     Run <code>python -m scripts.build_summary</code> at least once, then ask a Claude Code
     session (in this project) to read <code>data/summary.json</code>, your real account
-    structure (Saxo sub-accounts, PEA eligibility, fund overlap, etc.), and write an
-    analysis into <code>dashboard/ai_overview.html</code> using the same card/table markup
-    as the rest of this dashboard (see <code>dashboard/template.html</code> for the CSS
-    classes available: <code>.card</code>, <code>.card-head</code>, <code>table</code>,
-    <code>.hero-sub</code>, etc.). It won't auto-update - re-ask periodically after
+    structure (Saxo sub-accounts, PEA eligibility, fund overlap, etc.), and write the same
+    analysis twice - into <code>dashboard/ai_overview.en.html</code> and
+    <code>dashboard/ai_overview.fr.html</code> - using the same card/table markup as the rest
+    of this dashboard (see <code>dashboard/template.html</code> for the CSS classes
+    available: <code>.card</code>, <code>.card-head</code>, <code>table</code>,
+    <code>.hero-sub</code>, etc.). The EN/FR toggle button on the AI Overview tab just
+    show/hides <code>#ai-overview-en</code> vs <code>#ai-overview-fr</code> - both are always
+    embedded in the page, no extra language means extra build logic beyond adding a third
+    file and a third toggle button. Neither file auto-updates - re-ask periodically after
     meaningful changes.
   </p>
 </div>
