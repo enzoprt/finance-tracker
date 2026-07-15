@@ -1,0 +1,31 @@
+<div class="card">
+  <div class="card-head"><h2>AI Overview — written by Claude</h2></div>
+  <p class="hero-sub" style="line-height:1.6">
+    This tab is not computed by a script like the rest of the dashboard - it's a
+    hand-written analysis of your real financial situation (net worth composition,
+    portfolio construction, performance vs benchmark, tax-wrapper usage, opinions on what
+    to consider changing), produced by asking Claude to read <code>data/summary.json</code>
+    plus your real broker/account structure and write it up.
+  </p>
+  <p class="hero-sub" style="line-height:1.6; margin-top:10px">
+    <strong>This file (<code>dashboard/ai_overview.html</code>) is gitignored</strong> because
+    it contains real personal financial data once written - this
+    <code>ai_overview.example.html</code> file is the generic placeholder that ships in the
+    repo instead, so the project structure makes sense without leaking anyone's actual
+    numbers.
+  </p>
+</div>
+
+<div class="card">
+  <div class="card-head"><h2>How to generate your own</h2></div>
+  <p style="line-height:1.7">
+    Run <code>python -m scripts.build_summary</code> at least once, then ask a Claude Code
+    session (in this project) to read <code>data/summary.json</code>, your real account
+    structure (Saxo sub-accounts, PEA eligibility, fund overlap, etc.), and write an
+    analysis into <code>dashboard/ai_overview.html</code> using the same card/table markup
+    as the rest of this dashboard (see <code>dashboard/template.html</code> for the CSS
+    classes available: <code>.card</code>, <code>.card-head</code>, <code>table</code>,
+    <code>.hero-sub</code>, etc.). It won't auto-update - re-ask periodically after
+    meaningful changes.
+  </p>
+</div>

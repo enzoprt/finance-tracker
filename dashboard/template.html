@@ -1,0 +1,943 @@
+<meta charset="UTF-8">
+<title>Finance Tracker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --page:           #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --gridline:       #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --good:           #006300;
+    --wash:           rgba(11,11,11,0.05);
+
+    --series-1: #2a78d6; /* blue */
+    --series-2: #1baf7a; /* aqua */
+    --series-3: #eda100; /* yellow */
+    --series-4: #008300; /* green */
+    --series-5: #4a3aa7; /* violet */
+    --series-6: #e34948; /* red */
+    --series-7: #e87ba4; /* magenta */
+    --series-8: #eb6834; /* orange */
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --page:           #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --gridline:       #2c2c2a;
+      --baseline:       #383835;
+      --border:         rgba(255,255,255,0.10);
+      --good:           #0ca30c;
+      --wash:           rgba(255,255,255,0.06);
+
+      --series-1: #3987e5;
+      --series-2: #199e70;
+      --series-3: #c98500;
+      --series-4: #008300;
+      --series-5: #9085e9;
+      --series-6: #e66767;
+      --series-7: #d55181;
+      --series-8: #d95926;
+    }
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    padding: max(16px, env(safe-area-inset-top)) 16px max(32px, env(safe-area-inset-bottom));
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  .top-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  h1 { font-size: 20px; margin: 4px 0 0; }
+  .generated { color: var(--text-muted); font-size: 12px; margin: 2px 0 0; }
+  .refresh-btn {
+    flex: 0 0 auto; border: 1px solid var(--border); background: var(--surface-1);
+    color: var(--text-primary); font-size: 13px; font-weight: 500; padding: 8px 14px;
+    border-radius: 10px; cursor: pointer;
+  }
+  .refresh-btn:active { background: var(--wash); }
+  .refresh-status { font-size: 12px; color: var(--text-muted); margin: 8px 0 0; min-height: 14px; }
+
+  .tabs {
+    display: flex; gap: 4px; margin: 18px 0 14px; overflow-x: auto;
+    border-bottom: 1px solid var(--gridline); padding-bottom: 1px;
+  }
+  .tab {
+    flex: 0 0 auto; font-size: 13px; font-weight: 500; color: var(--text-secondary);
+    padding: 8px 12px; border-radius: 8px 8px 0 0; cursor: pointer; white-space: nowrap;
+    border-bottom: 2px solid transparent;
+  }
+  .tab.active { color: var(--text-primary); border-bottom-color: var(--series-1); }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 14px;
+    overflow-x: auto;
+    position: relative;
+  }
+  .card-head { display: flex; justify-content: space-between; align-items: flex-start; margin: 0 0 12px; }
+  .card-head h2 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+    margin: 0;
+    font-weight: 600;
+  }
+  .info-btn {
+    flex: 0 0 auto; width: 20px; height: 20px; border-radius: 50%;
+    border: 1px solid var(--border); background: transparent; color: var(--text-muted);
+    font-size: 12px; font-style: italic; font-family: Georgia, serif; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; line-height: 1;
+  }
+  .info-panel {
+    display: none; background: var(--wash); border-radius: 8px; padding: 10px 12px;
+    font-size: 12.5px; color: var(--text-secondary); margin: -4px 0 12px; line-height: 1.5;
+  }
+  .info-panel.open { display: block; }
+
+  .hero-value { font-size: 40px; font-weight: 600; line-height: 1.1; margin: 0; }
+  .hero-sub { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+
+  .kpi-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .stat-tile { flex: 1 1 140px; }
+  .stat-tile .label { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+  .stat-tile .value { font-size: 24px; font-weight: 600; }
+  .stat-tile .value.good { color: var(--good); }
+
+  .bar-row { display: flex; align-items: center; gap: 10px; padding: 5px 0; }
+  .bar-row .label { flex: 0 0 128px; font-size: 13px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bar-row .track { flex: 1; height: 16px; background: var(--gridline); border-radius: 4px; position: relative; }
+  .bar-row .fill { height: 16px; border-radius: 4px 0 0 4px; background: var(--series-1); }
+  .bar-row .fill:only-child { border-radius: 4px; }
+  .bar-row .value { flex: 0 0 auto; font-size: 13px; font-variant-numeric: tabular-nums; color: var(--text-primary); min-width: 64px; text-align: right; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 10px 16px; }
+  .legend .item { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--text-secondary); }
+  .legend .swatch { width: 10px; height: 10px; border-radius: 2px; flex: 0 0 auto; }
+
+  .subhead { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin: 18px 0 8px; text-transform: uppercase; letter-spacing: 0.03em; }
+  .card > .subhead:first-child { margin-top: 0; }
+  .range-picker { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+  .range-btn {
+    font-size: 11.5px; font-weight: 500; padding: 5px 10px; border-radius: 7px;
+    border: 1px solid var(--border); background: transparent; color: var(--text-secondary); cursor: pointer;
+  }
+  .range-btn.active { background: var(--series-1); color: #ffffff; border-color: var(--series-1); }
+
+  .month-chart { display: flex; align-items: flex-end; gap: 10px; height: 130px; padding-top: 8px; }
+  .month-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .month-bars { display: flex; align-items: flex-end; gap: 3px; height: 100px; }
+  .month-bars .bar { width: 12px; border-radius: 3px 3px 0 0; }
+  .month-label { font-size: 11px; color: var(--text-muted); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th, td { text-align: left; padding: 6px 8px 6px 0; border-bottom: 1px solid var(--gridline); white-space: nowrap; }
+  th { color: var(--text-muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .empty { color: var(--text-muted); font-size: 13px; font-style: italic; }
+
+  svg.linechart { width: 100%; height: 140px; overflow: visible; }
+  svg.linechart .grid { stroke: var(--gridline); stroke-width: 1; }
+  svg.linechart .line { fill: none; stroke: var(--series-1); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+  svg.linechart .area { fill: var(--series-1); opacity: 0.10; }
+  svg.linechart .dot { fill: var(--series-1); stroke: var(--surface-1); stroke-width: 2; }
+  svg.linechart text { fill: var(--text-muted); font-size: 10px; font-family: system-ui, sans-serif; }
+
+  svg.treemap { width: 100%; height: auto; display: block; }
+  svg.treemap rect.cell { stroke: var(--surface-1); stroke-width: 2; }
+  svg.treemap text { font-family: system-ui, sans-serif; font-size: 11px; font-weight: 600; }
+  svg.treemap text.pct { font-weight: 400; font-size: 10px; }
+
+  /* Phones keep the single-column stack above; wider screens (this app
+     opened on the Mac) get a mosaic layout instead of one long narrow
+     column, which reads oddly stretched across a desktop-sized window. */
+  @media (min-width: 860px) {
+    body { max-width: 1200px; }
+    .page.active {
+      column-count: 2;
+      column-gap: 16px;
+    }
+    .page.active .card {
+      break-inside: avoid;
+      -webkit-column-break-inside: avoid;
+      display: inline-block;
+      width: 100%;
+    }
+  }
+  @media (min-width: 1300px) {
+    .page.active { column-count: 3; }
+  }
+</style>
+
+<div class="top-row">
+  <div>
+    <h1>Finance Tracker</h1>
+    <div class="generated" id="generated"></div>
+  </div>
+  <button class="refresh-btn" id="refresh-btn">↻ Refresh</button>
+</div>
+<div class="refresh-status" id="refresh-status"></div>
+
+<div class="tabs">
+  <div class="tab active" data-page="overview">Overview</div>
+  <div class="tab" data-page="performance">Performance</div>
+  <div class="tab" data-page="allocation">Allocation</div>
+  <div class="tab" data-page="cashflow">Cash flow</div>
+  <div class="tab" data-page="fees">Fees &amp; FX</div>
+  <div class="tab" data-page="anomalies">Anomalies</div>
+  <div class="tab" data-page="ai-overview">AI Overview</div>
+</div>
+
+<div class="page active" id="page-overview">
+  <div class="card">
+    <div class="card-head"><h2>Net worth</h2><button class="info-btn" data-info="nw">i</button></div>
+    <div class="info-panel" data-info-panel="nw">Total value across Saxo, LCL, N26, and your Livrets (Livret A / Livret Jeune), converted to EUR. Livrets can't be fetched via any bank API (outside PSD2 scope) — their balance is a manual seed plus detected transfers. Saxo is valued at position-open price, not live market price — see the Allocation tab.</div>
+    <p class="hero-value" id="net-worth-value">-</p>
+    <p class="hero-sub" id="net-worth-date"></p>
+    <div class="subhead">Over time</div>
+    <div id="net-worth-chart"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2>By account</h2><button class="info-btn" data-info="nwa">i</button></div>
+    <div class="info-panel" data-info-panel="nwa">Current balance per account, in EUR, sorted largest first.</div>
+    <div id="net-worth-accounts"></div>
+  </div>
+</div>
+
+<div class="page" id="page-performance">
+  <div class="card">
+    <div class="card-head"><h2>ETF performance</h2><button class="info-btn" data-info="perf">i</button></div>
+    <div class="info-panel" data-info-panel="perf">XIRR (money-weighted) accounts for exactly when you deposited or withdrew money — it's your personal real-world return. TWR (time-weighted) ignores deposit timing and is the fair number to compare against a benchmark index, since the benchmark can't "know" when you added cash. Both are computed over the date range shown below.</div>
+    <div id="performance-body"></div>
+    <div class="subhead">Over time</div>
+    <div id="performance-chart"></div>
+  </div>
+</div>
+
+<div class="page" id="page-allocation">
+  <div class="card">
+    <div class="card-head"><h2>By geography</h2><button class="info-btn" data-info="geo">i</button></div>
+    <div class="info-panel" data-info-panel="geo">Real look-through data via each fund's top ~10 holdings (Yahoo Finance), weighted by that fund's value in your portfolio. Country is inferred from each stock's listing exchange. Since only the top holdings per fund are available (not the full list, e.g. a "World" fund can hold 1,500+ stocks), the uncovered remainder shows as "Other holdings (beyond top 10 per fund)" rather than being silently dropped.</div>
+    <div id="treemap-geo"></div>
+    <div class="subhead">Over time</div>
+    <div id="geo-history-chart"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2>By sector</h2><button class="info-btn" data-info="sector">i</button></div>
+    <div class="info-panel" data-info-panel="sector">Real, full-coverage sector data from Yahoo Finance (not just top holdings — this one covers each fund's entire composition), weighted by that fund's value in your portfolio.</div>
+    <div id="treemap-sector"></div>
+    <div class="subhead">Over time</div>
+    <div id="sector-history-chart"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2>Holdings</h2><button class="info-btn" data-info="funds">i</button></div>
+    <div class="info-panel" data-info-panel="funds">All open ETF positions, weighted by value. Values use Saxo's position-open price — this app has no live market-data subscription (<code>trade/v1/infoprices</code> returns "NoAccess"), so weights lag current prices and won't exactly match your unrealized-gain-adjusted portfolio value shown on Overview.</div>
+    <div id="treemap-funds"></div>
+    <div id="allocation-funds" style="margin-top:14px"></div>
+  </div>
+</div>
+
+<div class="page" id="page-cashflow">
+  <div class="card">
+    <div class="card-head"><h2>Cash flow, last months</h2><button class="info-btn" data-info="cf">i</button></div>
+    <div class="info-panel" data-info-panel="cf">Income and expenses from LCL and N26. Internal transfers (e.g. towards a Livret) are excluded from both, so they don't inflate either side.</div>
+    <div id="cashflow-picker"></div>
+    <div id="cashflow-chart"></div>
+    <div class="legend" style="margin-top:10px">
+      <span class="item"><span class="swatch" style="background:var(--series-1)"></span>Income</span>
+      <span class="item"><span class="swatch" style="background:var(--series-6)"></span>Expense</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2>Spending by type</h2><button class="info-btn" data-info="spend">i</button></div>
+    <div class="info-panel" data-info-panel="spend">Categorized by keyword-matching the merchant name in each transaction. Purchases that don't match a known merchant keyword fall into "other"; payments routed through PayPal show as "online_payment" since the actual merchant behind PayPal isn't visible in the bank data.</div>
+    <div id="spending-body"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2>Transaction history</h2><button class="info-btn" data-info="txns">i</button></div>
+    <div class="info-panel" data-info-panel="txns">Every LCL and N26 transaction, newest first. "Bank" shows which account it's on; "Category" is the same classification used in the charts above (income, spending, fee, or internal_transfer for moves like a Livret top-up).</div>
+    <div id="transactions-table" style="max-height:420px; overflow-y:auto"></div>
+  </div>
+</div>
+
+<div class="page" id="page-fees">
+  <div class="card">
+    <div class="card-head"><h2>Fees</h2><button class="info-btn" data-info="fees">i</button></div>
+    <div class="info-panel" data-info-panel="fees">Detected via keyword matching: COTISATION / FRAIS / AGIOS / COMMISSION for LCL, "Fee" for N26 (e.g. card fees, foreign transaction fees).</div>
+    <div class="kpi-row" style="margin-bottom:14px">
+      <div class="stat-tile"><div class="label">Total</div><div class="value" id="fees-total">-</div></div>
+      <div class="stat-tile"><div class="label">Count</div><div class="value" id="fees-count">-</div></div>
+    </div>
+    <div id="fees-by-type"></div>
+    <div class="subhead">Over time</div>
+    <div id="fees-history-chart"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2>Foreign exchange cost</h2><button class="info-btn" data-info="fx">i</button></div>
+    <div class="info-panel" data-info-panel="fx">For each foreign-currency card purchase, compares the rate you were actually charged against the ECB reference rate for that date (frankfurter.app). Positive % = you paid more than the ECB rate. Useful to watch during the Quebec semester for EUR→CAD costs.</div>
+    <div class="kpi-row" style="margin-bottom:14px">
+      <div class="stat-tile"><div class="label">Average markup vs ECB</div><div class="value" id="fx-avg">-</div></div>
+      <div class="stat-tile"><div class="label">Transactions</div><div class="value" id="fx-count">-</div></div>
+    </div>
+    <div id="fx-table"></div>
+    <div class="subhead">Over time</div>
+    <div id="fx-history-chart"></div>
+  </div>
+</div>
+
+<div class="page" id="page-anomalies">
+  <div class="card">
+    <div class="card-head"><h2>Anomalies</h2><button class="info-btn" data-info="anom">i</button></div>
+    <div class="info-panel" data-info-panel="anom">Automatic checks, nothing more: fees ≥20€, same account/amount/merchant charges within 2 days (possible duplicates — could be legitimate, e.g. two toll crossings), and spending ≥5× your median transaction. Review, don't assume they're errors.</div>
+    <div id="anomalies-body"></div>
+    <div class="subhead">Over time</div>
+    <div id="anomalies-history-chart"></div>
+  </div>
+</div>
+
+<div class="page" id="page-ai-overview">
+__AI_OVERVIEW__
+</div>
+
+<script>
+const SUMMARY = __SUMMARY_JSON__;
+
+function fmtEUR(n) {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+}
+function fmtEUR2(n) {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 }).format(n);
+}
+function fmtPct(fraction, digits = 1) {
+  return (fraction * 100).toFixed(digits) + '%';
+}
+function el(tag, attrs = {}, children = []) {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') node.className = v;
+    else if (k === 'text') node.textContent = v;
+    else node.setAttribute(k, v);
+  }
+  for (const c of [].concat(children)) node.appendChild(c);
+  return node;
+}
+const SERIES = ['--series-1','--series-2','--series-3','--series-4','--series-5','--series-6','--series-7','--series-8'];
+const SERIES_HEX_LIGHT = ['#2a78d6','#1baf7a','#eda100','#008300','#4a3aa7','#e34948','#e87ba4','#eb6834'];
+
+function textColorFor(hex) {
+  // Pick whichever of black/white ink clears more contrast against this
+  // fill (WCAG relative-luminance contrast ratio) - a fixed L threshold
+  // gets this wrong for colors like the palette's yellow, whose luminance
+  // sits high enough that white text only reaches ~2.2:1 against it.
+  const rgb = hex.match(/\w\w/g).map(x => parseInt(x, 16) / 255);
+  const lin = rgb.map(c => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+  const L = 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2];
+  const contrastWithWhite = 1.05 / (L + 0.05);
+  const contrastWithBlack = (L + 0.05) / 0.05;
+  return contrastWithBlack >= contrastWithWhite ? '#0b0b0b' : '#ffffff';
+}
+
+/* ---------- Tabs ---------- */
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('page-' + tab.dataset.page).classList.add('active');
+  });
+});
+
+/* ---------- Info panels ---------- */
+document.querySelectorAll('.info-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const panel = document.querySelector(`[data-info-panel="${btn.dataset.info}"]`);
+    panel.classList.toggle('open');
+  });
+});
+
+/* ---------- Refresh (works only when served locally by scripts/serve_dashboard.py) ---------- */
+document.getElementById('refresh-btn').addEventListener('click', async () => {
+  const status = document.getElementById('refresh-status');
+  status.textContent = 'Refreshing…';
+  try {
+    const res = await fetch('/refresh', { method: 'POST', headers: { 'X-Requested-With': 'finance-tracker' } });
+    const data = await res.json();
+    if (!data.ok) throw new Error('Build failed - see terminal running serve_dashboard.py');
+    status.textContent = 'Done, reloading…';
+    location.reload();
+  } catch (e) {
+    status.textContent = 'Refresh only works when opened via "python -m scripts.serve_dashboard" on the Mac (' + e.message + ')';
+  }
+});
+
+/* ---------- Shared: sequential bar list ---------- */
+function renderSequentialBars(container, items, formatValue) {
+  container.innerHTML = '';
+  if (!items.length) { container.appendChild(el('p', { class: 'empty', text: 'No data yet.' })); return; }
+  const max = Math.max(...items.map(i => i.value));
+  for (const item of items) {
+    const pct = max > 0 ? (item.value / max * 100) : 0;
+    const row = el('div', { class: 'bar-row' });
+    row.appendChild(el('div', { class: 'label', text: item.label }));
+    const track = el('div', { class: 'track' });
+    track.appendChild(el('div', { class: 'fill', style: `width:${pct}%` }));
+    row.appendChild(track);
+    row.appendChild(el('div', { class: 'value', text: formatValue(item.value) }));
+    container.appendChild(row);
+  }
+}
+
+/* ---------- Treemap (squarified) ---------- */
+function squarify(values, x0, y0, w0, h0) {
+  const areaScale = (w0 * h0) / values.reduce((a, b) => a + b, 0);
+  const areas = values.map(v => v * areaScale);
+  const rects = [];
+  let x = x0, y = y0, w = w0, h = h0, remaining = areas.slice();
+
+  function worst(row, length) {
+    const sum = row.reduce((a, b) => a + b, 0);
+    const max = Math.max(...row), min = Math.min(...row);
+    return Math.max((length * length * max) / (sum * sum), (sum * sum) / (length * length * min));
+  }
+
+  while (remaining.length) {
+    const length = Math.min(w, h);
+    let row = [remaining[0]], i = 1;
+    while (i < remaining.length) {
+      const testRow = row.concat([remaining[i]]);
+      if (worst(testRow, length) <= worst(row, length)) { row = testRow; i++; } else break;
+    }
+    const rowSum = row.reduce((a, b) => a + b, 0);
+    if (w >= h) {
+      const rowWidth = rowSum / h;
+      let ry = y;
+      for (const a of row) { const rh = a / rowWidth; rects.push({ x, y: ry, w: rowWidth, h: rh }); ry += rh; }
+      x += rowWidth; w -= rowWidth;
+    } else {
+      const rowHeight = rowSum / w;
+      let rx = x;
+      for (const a of row) { const rw = a / rowHeight; rects.push({ x: rx, y, w: rw, h: rowHeight }); rx += rw; }
+      y += rowHeight; h -= rowHeight;
+    }
+    remaining = remaining.slice(row.length);
+  }
+  return rects;
+}
+
+function renderTreemap(container, items) {
+  // items: [{label, value, pct}], sorted desc by caller
+  container.innerHTML = '';
+  if (!items.length) { container.appendChild(el('p', { class: 'empty', text: 'No data yet.' })); return; }
+
+  const W = 500, H = 260;
+  const rects = squarify(items.map(i => i.value), 0, 0, W, H);
+
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'treemap');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('preserveAspectRatio', 'none');
+
+  items.forEach((item, i) => {
+    const r = rects[i];
+    const hex = SERIES_HEX_LIGHT[i % SERIES_HEX_LIGHT.length];
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('class', 'cell');
+    rect.setAttribute('x', r.x); rect.setAttribute('y', r.y);
+    rect.setAttribute('width', Math.max(r.w, 0)); rect.setAttribute('height', Math.max(r.h, 0));
+    rect.setAttribute('fill', `var(${SERIES[i % SERIES.length]})`);
+    g.appendChild(rect);
+
+    const textColor = textColorFor(hex);
+    const fitsLabel = r.w > 54 && r.h > 30;
+    if (fitsLabel) {
+      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      label.setAttribute('x', r.x + 8); label.setAttribute('y', r.y + 18);
+      label.setAttribute('fill', textColor);
+      label.textContent = item.label.length > 18 && r.w < 110 ? item.label.slice(0, 16) + '…' : item.label;
+      g.appendChild(label);
+
+      const pctLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      pctLabel.setAttribute('class', 'pct');
+      pctLabel.setAttribute('x', r.x + 8); pctLabel.setAttribute('y', r.y + 32);
+      pctLabel.setAttribute('fill', textColor);
+      pctLabel.textContent = item.pct.toFixed(1) + '%';
+      g.appendChild(pctLabel);
+    }
+
+    svg.appendChild(g);
+  });
+
+  container.appendChild(svg);
+
+  const legend = el('div', { class: 'legend', style: 'margin-top:10px' });
+  items.forEach((item, i) => {
+    legend.appendChild(el('span', { class: 'item' }, [
+      el('span', { class: 'swatch', style: `background:var(${SERIES[i % SERIES.length]})` }),
+      el('span', { text: `${item.label} — ${item.pct.toFixed(1)}%` }),
+    ]));
+  });
+  container.appendChild(legend);
+}
+
+/* ---------- Time-series range picker + multi-line chart ---------- */
+const DAY_PRESETS = [
+  { label: '1M', days: 30 }, { label: '3M', days: 90 }, { label: '6M', days: 180 },
+  { label: '1Y', days: 365 }, { label: 'All', days: null },
+];
+const MONTH_PRESETS = [
+  { label: '3M', count: 3 }, { label: '6M', count: 6 }, { label: '12M', count: 12 }, { label: 'All', count: null },
+];
+
+function filterByDays(points, days) {
+  if (days == null || !points.length) return points;
+  const cutoff = new Date(points[points.length - 1].date);
+  cutoff.setDate(cutoff.getDate() - days);
+  return points.filter(p => new Date(p.date) >= cutoff);
+}
+function filterByCount(points, count) {
+  return count == null ? points : points.slice(-count);
+}
+
+function renderRangePicker(container, presets, defaultIndex, onSelect) {
+  const bar = el('div', { class: 'range-picker' });
+  presets.forEach((preset, i) => {
+    const btn = el('button', { class: 'range-btn' + (i === defaultIndex ? ' active' : ''), text: preset.label });
+    btn.addEventListener('click', () => {
+      bar.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      onSelect(preset);
+    });
+    bar.appendChild(btn);
+  });
+  container.appendChild(bar);
+}
+
+// seriesList: [{label, points: [{date, value}], colorVar, dashed}]
+// includeZero: pull the y-axis domain to always show the 0 baseline - wanted
+// for return/percentage series (so above/below zero is visible), wrong for
+// absolute-value series like net worth or fee totals, where it would flatten
+// real variation against a huge, meaningless gap down to 0.
+function renderMultiLineChart(container, seriesList, { includeZero = false } = {}) {
+  container.innerHTML = '';
+  const nonEmpty = seriesList.filter(s => s.points.length > 0);
+  if (!nonEmpty.length) { container.appendChild(el('p', { class: 'empty', text: 'No data yet.' })); return; }
+  if (nonEmpty.every(s => s.points.length < 2)) {
+    container.appendChild(el('p', { class: 'empty', text: 'Not enough data points yet for this range.' }));
+    return;
+  }
+
+  const w = 500, h = 120, pad = 8;
+  const allValues = nonEmpty.flatMap(s => s.points.map(p => p.value));
+  const zeroPad = includeZero ? [0] : [];
+  const min = Math.min(...allValues, ...zeroPad), max = Math.max(...allValues, ...zeroPad);
+  const range = (max - min) || 1;
+  const y = v => h - pad - ((v - min) / range) * (h - 2 * pad);
+
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'linechart');
+  svg.setAttribute('viewBox', `0 0 ${w} ${h + 16}`);
+  svg.setAttribute('preserveAspectRatio', 'none');
+  const baseline = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  baseline.setAttribute('class', 'grid');
+  const baselineY = includeZero ? y(0) : h - pad;
+  baseline.setAttribute('x1', pad); baseline.setAttribute('y1', baselineY);
+  baseline.setAttribute('x2', w - pad); baseline.setAttribute('y2', baselineY);
+  svg.appendChild(baseline);
+
+  const longest = nonEmpty.reduce((a, b) => (a.points.length >= b.points.length ? a : b));
+
+  for (const s of nonEmpty) {
+    const n = s.points.length;
+    const x = i => pad + (n === 1 ? (w - 2 * pad) / 2 : (i / (n - 1)) * (w - 2 * pad));
+    const path = s.points.map((p, i) => `${i === 0 ? 'M' : 'L'}${x(i)},${y(p.value)}`).join(' ');
+
+    const lineEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    lineEl.setAttribute('d', path);
+    lineEl.setAttribute('fill', 'none');
+    lineEl.setAttribute('stroke', s.colorVar);
+    lineEl.setAttribute('stroke-width', '2');
+    lineEl.setAttribute('stroke-linejoin', 'round');
+    lineEl.setAttribute('stroke-linecap', 'round');
+    if (s.dashed) lineEl.setAttribute('stroke-dasharray', '5 4');
+    svg.appendChild(lineEl);
+
+    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    dot.setAttribute('cx', x(n - 1)); dot.setAttribute('cy', y(s.points[n - 1].value));
+    dot.setAttribute('r', 4); dot.setAttribute('fill', s.colorVar);
+    dot.setAttribute('stroke', 'var(--surface-1)'); dot.setAttribute('stroke-width', '2');
+    svg.appendChild(dot);
+  }
+
+  const startLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  startLabel.setAttribute('x', pad); startLabel.setAttribute('y', h + 14); startLabel.setAttribute('text-anchor', 'start');
+  startLabel.textContent = longest.points[0].date;
+  svg.appendChild(startLabel);
+  const endLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  endLabel.setAttribute('x', w - pad); endLabel.setAttribute('y', h + 14); endLabel.setAttribute('text-anchor', 'end');
+  endLabel.textContent = longest.points[longest.points.length - 1].date;
+  svg.appendChild(endLabel);
+
+  container.appendChild(svg);
+
+  if (nonEmpty.length > 1) {
+    const legend = el('div', { class: 'legend', style: 'margin-top:10px' });
+    for (const s of nonEmpty) {
+      legend.appendChild(el('span', { class: 'item' }, [
+        el('span', { class: 'swatch', style: `background:${s.colorVar}` }),
+        el('span', { text: s.label }),
+      ]));
+    }
+    container.appendChild(legend);
+  }
+}
+
+// Wires a range picker to a multi-line chart. series: same shape as renderMultiLineChart.
+function renderTimeSeriesSection(container, { series, presets, defaultIndex, granularity, includeZero = false }) {
+  container.innerHTML = '';
+  const pickerEl = el('div');
+  const chartEl = el('div');
+  container.appendChild(pickerEl);
+  container.appendChild(chartEl);
+
+  function apply(preset) {
+    const filterFn = granularity === 'day'
+      ? (pts => filterByDays(pts, preset.days))
+      : (pts => filterByCount(pts, preset.count));
+    renderMultiLineChart(chartEl, series.map(s => ({ ...s, points: filterFn(s.points) })), { includeZero });
+  }
+
+  renderRangePicker(pickerEl, presets, defaultIndex, apply);
+  apply(presets[defaultIndex]);
+}
+
+function renderNetWorth() {
+  const nw = SUMMARY.net_worth;
+  document.getElementById('net-worth-value').textContent = fmtEUR(nw.total_eur);
+  document.getElementById('net-worth-date').textContent = 'as of ' + nw.date;
+
+  const items = Object.entries(nw.accounts)
+    .map(([label, value]) => ({ label, value }))
+    .sort((a, b) => b.value - a.value);
+  renderSequentialBars(document.getElementById('net-worth-accounts'), items, fmtEUR);
+
+  const chartEl = document.getElementById('net-worth-chart');
+  const history = SUMMARY.net_worth_history || [];
+  if (history.length < 2) {
+    chartEl.appendChild(el('p', { class: 'hero-sub', text: 'History builds up as you re-run the tracker over time.' }));
+    return;
+  }
+  renderTimeSeriesSection(chartEl, {
+    series: [{ label: 'Net worth', points: history.map(h => ({ date: h.date, value: h.total_eur })), colorVar: 'var(--series-1)' }],
+    presets: DAY_PRESETS, defaultIndex: 4, granularity: 'day',
+  });
+}
+
+function renderPerformance() {
+  const p = SUMMARY.performance;
+  const body = document.getElementById('performance-body');
+  if (p.status === 'no_activity') {
+    body.appendChild(el('p', { class: 'empty', text: `No cash activity between ${p.from_date} and ${p.to_date} yet.` }));
+    return;
+  }
+  const row = el('div', { class: 'kpi-row' });
+  row.appendChild(el('div', { class: 'stat-tile' }, [
+    el('div', { class: 'label', text: 'XIRR (money-weighted)' }),
+    el('div', { class: 'value', text: fmtPct(p.xirr, 2) }),
+  ]));
+  row.appendChild(el('div', { class: 'stat-tile' }, [
+    el('div', { class: 'label', text: 'TWR (time-weighted)' }),
+    el('div', { class: 'value', text: p.twr != null ? fmtPct(p.twr, 2) : '–' }),
+  ]));
+  row.appendChild(el('div', { class: 'stat-tile' }, [
+    el('div', { class: 'label', text: `Benchmark (${p.benchmark.ticker})` }),
+    el('div', { class: 'value', text: fmtPct(p.benchmark.total_return, 2) }),
+  ]));
+  body.appendChild(row);
+  body.appendChild(el('p', { class: 'hero-sub', text: `${p.from_date} → ${p.to_date} • portfolio value ${fmtEUR(p.final_portfolio_value)}` }));
+
+  const chartEl = document.getElementById('performance-chart');
+  if (!p.series || p.series.dates.length < 2) {
+    chartEl.appendChild(el('p', { class: 'empty', text: 'Not enough daily data points yet.' }));
+    return;
+  }
+  const portfolioPoints = p.series.dates.map((d, i) => ({ date: d, value: p.series.portfolio_twr[i] }));
+  const benchmarkPoints = p.series.dates
+    .map((d, i) => ({ date: d, value: p.series.benchmark_return[i] }))
+    .filter(pt => pt.value != null);
+  renderTimeSeriesSection(chartEl, {
+    series: [
+      { label: 'Portfolio (TWR)', points: portfolioPoints, colorVar: 'var(--series-1)' },
+      { label: `Benchmark (${p.benchmark.ticker})`, points: benchmarkPoints, colorVar: 'var(--text-muted)', dashed: true },
+    ],
+    presets: DAY_PRESETS, defaultIndex: 4, granularity: 'day', includeZero: true,
+  });
+}
+
+// Geography can grow an open-ended list of countries as more funds are
+// added, so it still gets a cap; sector is yfinance's fixed ~11-category
+// list (already precise/complete) and holdings is our own exact 20 funds -
+// neither needs an "Other" bucket, so they're shown in full.
+const GEOGRAPHY_TOP_N = 10;
+const ALLOCATION_TOP_N = GEOGRAPHY_TOP_N;
+
+function capWithOther(items, topN) {
+  if (items.length <= topN) return items;
+  const top = items.slice(0, topN);
+  const restValue = items.slice(topN).reduce((s, i) => s + i.value, 0);
+  return [...top, { label: 'Other', pct: restValue, value: restValue }];
+}
+
+function renderAllocation() {
+  const alloc = SUMMARY.etf_allocation;
+
+  const geoItems = capWithOther(
+    Object.entries(alloc.by_geography_pct).map(([label, pct]) => ({ label, pct, value: pct })).sort((a, b) => b.value - a.value),
+    GEOGRAPHY_TOP_N,
+  );
+  renderTreemap(document.getElementById('treemap-geo'), geoItems);
+
+  const sectorItems = Object.entries(alloc.by_sector_pct)
+    .map(([label, pct]) => ({ label, pct, value: pct }))
+    .sort((a, b) => b.value - a.value);
+  renderTreemap(document.getElementById('treemap-sector'), sectorItems);
+
+  const sortedFunds = alloc.by_fund.slice().sort((a, b) => b.value_eur - a.value_eur);
+  const fundItems = sortedFunds.map(f => ({ label: f.symbol, pct: f.weight_pct, value: f.value_eur }));
+  renderTreemap(document.getElementById('treemap-funds'), fundItems);
+
+  const fundsEl = document.getElementById('allocation-funds');
+  const table = el('table');
+  table.appendChild(el('thead', {}, el('tr', {}, [
+    el('th', { text: 'Fund' }), el('th', { text: 'Weight' }),
+  ])));
+  const tbody = el('tbody');
+  for (const f of sortedFunds) {
+    tbody.appendChild(el('tr', {}, [
+      el('td', { text: f.symbol + ' — ' + f.description }),
+      el('td', { class: 'num', text: f.weight_pct.toFixed(1) + '%' }),
+    ]));
+  }
+  table.appendChild(tbody);
+  fundsEl.appendChild(table);
+
+  renderAllocationHistory(document.getElementById('geo-history-chart'), alloc.history || [], 'by_geography_pct');
+  renderAllocationHistory(document.getElementById('sector-history-chart'), alloc.history || [], 'by_sector_pct');
+}
+
+function renderAllocationHistory(container, history, key) {
+  container.innerHTML = '';
+  if (history.length < 2) {
+    container.appendChild(el('p', { class: 'empty', text: 'History builds up as you re-run the tracker over time.' }));
+    return;
+  }
+  const categories = Object.entries(history[history.length - 1][key])
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, ALLOCATION_TOP_N)
+    .map(([cat]) => cat);
+  const series = categories.map((cat, i) => ({
+    label: cat,
+    points: history.map(h => ({ date: h.date, value: h[key][cat] || 0 })),
+    colorVar: `var(${SERIES[i % SERIES.length]})`,
+  }));
+  renderTimeSeriesSection(container, { series, presets: DAY_PRESETS, defaultIndex: 4, granularity: 'day' });
+}
+
+function renderCashflow() {
+  const cf = SUMMARY.cash_flow;
+  const allMonths = Object.entries(cf.monthly);
+  const chartEl = document.getElementById('cashflow-chart');
+  if (!allMonths.length) { chartEl.appendChild(el('p', { class: 'empty', text: 'No data yet.' })); return; }
+
+  function drawMonths(months) {
+    chartEl.innerHTML = '';
+    const max = Math.max(...months.flatMap(([, v]) => [v.income, v.expense]), 1);
+    const chart = el('div', { class: 'month-chart' });
+    for (const [month, v] of months) {
+      const col = el('div', { class: 'month-col' });
+      const bars = el('div', { class: 'month-bars' });
+      bars.appendChild(el('div', { class: 'bar', style: `height:${v.income / max * 100}px; background:var(--series-1)` }));
+      bars.appendChild(el('div', { class: 'bar', style: `height:${v.expense / max * 100}px; background:var(--series-6)` }));
+      col.appendChild(bars);
+      col.appendChild(el('div', { class: 'month-label', text: month.slice(5) + '/' + month.slice(2, 4) }));
+      chart.appendChild(col);
+    }
+    chartEl.appendChild(chart);
+  }
+  renderRangePicker(document.getElementById('cashflow-picker'), MONTH_PRESETS, 3, preset => {
+    drawMonths(filterByCount(allMonths, preset.count));
+  });
+  drawMonths(allMonths);
+
+  const spendItems = Object.entries(cf.spending_by_type).map(([label, value]) => ({ label, value }));
+  renderSequentialBars(document.getElementById('spending-body'), spendItems, fmtEUR);
+
+  renderTransactionsTable();
+}
+
+function renderTransactionsTable() {
+  const container = document.getElementById('transactions-table');
+  const txns = (SUMMARY.transactions || []).slice().sort((a, b) => b.date.localeCompare(a.date));
+  if (!txns.length) { container.appendChild(el('p', { class: 'empty', text: 'No data yet.' })); return; }
+
+  const table = el('table');
+  table.appendChild(el('thead', {}, el('tr', {}, [
+    el('th', { text: 'Date' }), el('th', { text: 'Bank' }), el('th', { text: 'Category' }),
+    el('th', { text: 'Amount' }), el('th', { text: 'Description' }),
+  ])));
+  const tbody = el('tbody');
+  for (const t of txns) {
+    tbody.appendChild(el('tr', {}, [
+      el('td', { text: t.date }),
+      el('td', { text: t.account }),
+      el('td', { text: t.category }),
+      el('td', { class: 'num', text: fmtEUR2(t.amount) }),
+      el('td', { text: t.description, style: 'white-space:normal; max-width:280px' }),
+    ]));
+  }
+  table.appendChild(tbody);
+  container.appendChild(table);
+}
+
+function renderFees() {
+  const fees = SUMMARY.fees;
+  document.getElementById('fees-total').textContent = fmtEUR2(fees.total);
+  document.getElementById('fees-count').textContent = fees.count;
+  const items = Object.entries(fees.by_type).map(([label, value]) => ({ label, value }));
+  renderSequentialBars(document.getElementById('fees-by-type'), items, fmtEUR2);
+
+  const feeMonths = Object.entries(fees.by_month).sort(([a], [b]) => a.localeCompare(b));
+  const chartEl = document.getElementById('fees-history-chart');
+  if (feeMonths.length < 2) {
+    chartEl.appendChild(el('p', { class: 'empty', text: 'History builds up as you re-run the tracker over time.' }));
+  } else {
+    renderTimeSeriesSection(chartEl, {
+      series: [{ label: 'Fees', points: feeMonths.map(([m, v]) => ({ date: m + '-01', value: v })), colorVar: 'var(--series-6)' }],
+      presets: MONTH_PRESETS, defaultIndex: 3, granularity: 'month',
+    });
+  }
+}
+
+function renderFxCost() {
+  const fx = SUMMARY.fx_cost;
+  document.getElementById('fx-avg').textContent = fx.average_markup_pct != null ? fx.average_markup_pct + '%' : '–';
+  document.getElementById('fx-count').textContent = fx.transactions.length;
+
+  const tableEl = document.getElementById('fx-table');
+  if (!fx.transactions.length) {
+    tableEl.appendChild(el('p', { class: 'empty', text: 'No foreign-currency transactions detected yet.' }));
+    return;
+  }
+  const table = el('table');
+  table.appendChild(el('thead', {}, el('tr', {}, [
+    el('th', { text: 'Date' }), el('th', { text: 'Currency' }), el('th', { text: 'Charged' }), el('th', { text: 'Markup' }),
+  ])));
+  const tbody = el('tbody');
+  for (const t of fx.transactions.slice(-10).reverse()) {
+    tbody.appendChild(el('tr', {}, [
+      el('td', { text: t.date }),
+      el('td', { text: t.foreign_currency }),
+      el('td', { class: 'num', text: fmtEUR2(t.eur_charged) }),
+      el('td', { class: 'num', text: t.markup_pct + '%' }),
+    ]));
+  }
+  table.appendChild(tbody);
+  tableEl.appendChild(table);
+
+  const byMonth = {};
+  for (const t of fx.transactions) {
+    const m = t.date.slice(0, 7);
+    (byMonth[m] = byMonth[m] || []).push(t.markup_pct);
+  }
+  const months = Object.entries(byMonth).sort(([a], [b]) => a.localeCompare(b));
+  const chartEl = document.getElementById('fx-history-chart');
+  if (months.length < 2) {
+    chartEl.appendChild(el('p', { class: 'empty', text: 'History builds up as more foreign-currency transactions happen.' }));
+  } else {
+    const points = months.map(([m, vals]) => ({ date: m + '-01', value: vals.reduce((s, v) => s + v, 0) / vals.length }));
+    renderTimeSeriesSection(chartEl, {
+      series: [{ label: 'Avg markup', points, colorVar: 'var(--series-3)' }],
+      presets: MONTH_PRESETS, defaultIndex: 3, granularity: 'month',
+    });
+  }
+}
+
+function renderAnomalies() {
+  const a = SUMMARY.anomalies;
+  const body = document.getElementById('anomalies-body');
+  const sections = [
+    ['Large fees', a.large_fees, t => `${t.date} — ${fmtEUR2(Math.abs(t.amount))} — ${t.description}`],
+    ['Possible duplicates', a.possible_duplicates, t => `${t.date_a} & ${t.date_b} — ${fmtEUR2(Math.abs(t.amount))} — ${t.description}`],
+    ['Outlier spending', a.outlier_spending, t => `${t.date} — ${fmtEUR2(Math.abs(t.amount))} — ${t.description}`],
+  ];
+  let any = false;
+  for (const [title, list, fmt] of sections) {
+    if (!list.length) continue;
+    any = true;
+    body.appendChild(el('p', { style: 'font-weight:600;font-size:13px;margin:12px 0 6px', text: title }));
+    const ul = el('div');
+    for (const item of list) ul.appendChild(el('p', { style: 'font-size:12.5px;color:var(--text-secondary);margin:3px 0', text: fmt(item) }));
+    body.appendChild(ul);
+  }
+  if (!any) body.appendChild(el('p', { class: 'empty', text: 'Nothing flagged.' }));
+
+  const allDates = [
+    ...a.large_fees.map(t => t.date),
+    ...a.possible_duplicates.map(t => t.date_b),
+    ...a.outlier_spending.map(t => t.date),
+  ];
+  const counts = {};
+  for (const d of allDates) { const m = d.slice(0, 7); counts[m] = (counts[m] || 0) + 1; }
+  const months = Object.entries(counts).sort(([x], [y]) => x.localeCompare(y));
+  const chartEl = document.getElementById('anomalies-history-chart');
+  if (months.length < 2) {
+    chartEl.appendChild(el('p', { class: 'empty', text: 'History builds up as you re-run the tracker over time.' }));
+  } else {
+    renderTimeSeriesSection(chartEl, {
+      series: [{ label: 'Anomalies', points: months.map(([m, c]) => ({ date: m + '-01', value: c })), colorVar: 'var(--series-7)' }],
+      presets: MONTH_PRESETS, defaultIndex: 3, granularity: 'month',
+    });
+  }
+}
+
+document.getElementById('generated').textContent = 'Generated ' + new Date(SUMMARY.generated_at).toLocaleString();
+renderNetWorth();
+renderPerformance();
+renderAllocation();
+renderCashflow();
+renderFees();
+renderFxCost();
+renderAnomalies();
+</script>
