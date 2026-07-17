@@ -93,14 +93,33 @@ iCloud-synced copy used on the phone has no server behind it, so tapping
 Refresh there just explains that it only works via this local server on
 the Mac.
 
+### Dock launcher (recommended over running the command by hand)
+
+```bash
+bash scripts/install-macos-app.sh
+```
+
+Generates `~/Applications/Finance Tracker.app` - a real double-clickable
+app (same "shell script wearing a .app bundle" trick as this user's other
+project, Orca Profile Manager - no compiled binary, `Info.plist` just
+points at a generated `launch.sh`). Clicking it starts
+`scripts.serve_dashboard` in the background if it isn't already running,
+then opens Safari straight to the dashboard - no terminal needed day to
+day. Drag it from `~/Applications` onto the Dock once, then that's the
+whole workflow going forward. The background server has no "quit" from
+the app itself; it's harmless (127.0.0.1-only) but stays running until the
+Mac restarts or you kill it by hand (`ps aux | grep serve_dashboard`).
+
 ## The "AI Overview" tab
 
-`dashboard/ai_overview.html` is a hand-written analysis (portfolio
-construction, fund overlap, performance vs benchmark, tax-wrapper usage,
-opinions on what to consider changing) - unlike the rest of the dashboard,
-it isn't computed by a script. It gets embedded into the dashboard as-is by
-both `build_dashboard.py` and `serve_dashboard.py` (via
-`src/dashboard_render.py`). To refresh it after a meaningful change (new
-funds, a big deposit, months of new transaction history), ask a Claude
-Code session to re-read the latest `data/summary.json` plus the real Saxo
-account structure and rewrite that file - it won't update on its own.
+`dashboard/ai_overview.en.html` / `dashboard/ai_overview.fr.html` are a
+hand-written analysis (portfolio construction, fund overlap, performance
+vs benchmark, tax-wrapper usage, opinions on what to consider changing),
+one per language with an EN/FR toggle button on the tab itself - unlike
+the rest of the dashboard, neither is computed by a script. Both get
+embedded into the dashboard as-is by `build_dashboard.py` and
+`serve_dashboard.py` (via `src/dashboard_render.py`). To refresh them
+after a meaningful change (new funds, a big deposit, months of new
+transaction history), ask a Claude Code session to re-read the latest
+`data/summary.json` plus the real Saxo account structure and rewrite both
+files - they won't update on their own.
