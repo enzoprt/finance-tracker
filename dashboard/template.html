@@ -15,6 +15,7 @@
     --baseline:       #c3c2b7;
     --border:         rgba(11,11,11,0.10);
     --good:           #006300;
+    --bad:            #b3251f;
     --wash:           rgba(11,11,11,0.05);
 
     --series-1: #2a78d6; /* blue */
@@ -38,6 +39,7 @@
       --baseline:       #383835;
       --border:         rgba(255,255,255,0.10);
       --good:           #0ca30c;
+      --bad:            #ef5350;
       --wash:           rgba(255,255,255,0.06);
 
       --series-1: #3987e5;
@@ -135,6 +137,18 @@
   .stat-tile .label { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
   .stat-tile .value { font-size: 24px; font-weight: 600; }
   .stat-tile .value.good { color: var(--good); }
+  .stat-tile .value.bad { color: var(--bad); }
+  td.num.good { color: var(--good); }
+  td.num.bad { color: var(--bad); }
+
+  .returns-chart { display: flex; align-items: flex-start; gap: 4px; position: relative; }
+  .returns-col { flex: 1; display: flex; flex-direction: column; align-items: center; min-width: 0; }
+  .returns-bar-wrap { width: 100%; position: relative; }
+  .returns-bar { position: absolute; left: 50%; width: 10px; transform: translateX(-50%); border-radius: 2px; min-height: 2px; }
+  .returns-bar.up { background: var(--good); }
+  .returns-bar.down { background: var(--bad); }
+  .returns-zero { position: absolute; left: 0; right: 0; height: 1px; background: var(--gridline); }
+  .returns-label { font-size: 10px; color: var(--text-muted); margin-top: 4px; white-space: nowrap; }
 
   .bar-row { display: flex; align-items: center; gap: 10px; padding: 5px 0; }
   .bar-row .label { flex: 0 0 128px; font-size: 13px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -156,6 +170,21 @@
   }
   .range-btn.active { background: var(--series-1); color: #ffffff; border-color: var(--series-1); }
 
+  .custom-range { display: none; gap: 8px; align-items: center; margin: 0 0 12px; flex-wrap: wrap; font-size: 12.5px; color: var(--text-secondary); }
+  .custom-range.open { display: flex; }
+  .custom-range input[type="date"] {
+    font-size: 12.5px; padding: 5px 8px; border-radius: 7px; border: 1px solid var(--border);
+    background: var(--surface-1); color: var(--text-primary); font-family: inherit;
+  }
+  .custom-range button {
+    font-size: 11.5px; font-weight: 500; padding: 5px 10px; border-radius: 7px;
+    border: 1px solid var(--series-1); background: var(--series-1); color: #ffffff; cursor: pointer;
+  }
+
+  .transfers-toggle { display: flex; align-items: center; gap: 8px; margin: 0 0 14px; }
+  .transfers-toggle .range-picker { margin-bottom: 0; }
+  .transfers-toggle .hint { font-size: 11.5px; color: var(--text-muted); }
+
   .month-chart { display: flex; align-items: flex-end; gap: 10px; height: 130px; padding-top: 8px; }
   .month-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
   .month-bars { display: flex; align-items: flex-end; gap: 3px; height: 100px; }
@@ -174,6 +203,17 @@
   svg.linechart .area { fill: var(--series-1); opacity: 0.10; }
   svg.linechart .dot { fill: var(--series-1); stroke: var(--surface-1); stroke-width: 2; }
   svg.linechart text { fill: var(--text-muted); font-size: 10px; font-family: system-ui, sans-serif; }
+
+  .sparkline-list { display: flex; flex-direction: column; }
+  .sparkline-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--gridline); }
+  .sparkline-row:last-child { border-bottom: none; }
+  .sparkline-label { flex: 0 0 150px; font-size: 12.5px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sparkline-chart { flex: 1 1 auto; height: 32px; min-width: 60px; }
+  .sparkline-chart svg { width: 100%; height: 100%; display: block; overflow: visible; }
+  .sparkline-now { flex: 0 0 52px; text-align: right; font-size: 12.5px; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+  .sparkline-delta { flex: 0 0 66px; text-align: right; font-size: 11.5px; font-variant-numeric: tabular-nums; color: var(--text-muted); }
+  .sparkline-delta.up { color: var(--good); }
+  .sparkline-delta.down { color: var(--bad); }
 
   svg.treemap { width: 100%; height: auto; display: block; }
   svg.treemap rect.cell { stroke: var(--surface-1); stroke-width: 2; }
@@ -194,6 +234,15 @@
       -webkit-column-break-inside: avoid;
       display: inline-block;
       width: 100%;
+    }
+    /* Cards with their own internal scroll (overflow-y: auto + fixed
+       max-height) confuse the column-balancing algorithm - it reserves a
+       phantom empty box for them in the column flow. Pulling them out of
+       the column flow entirely (full width, above/below the columns)
+       avoids that and suits a wide table better anyway. */
+    .page.active .card.full-width {
+      column-span: all;
+      display: block;
     }
   }
   @media (min-width: 1300px) {
@@ -222,6 +271,7 @@
   <div class="tab" data-page="performance">Performance</div>
   <div class="tab" data-page="allocation">Allocation</div>
   <div class="tab" data-page="cashflow">Cash flow</div>
+  <div class="tab" data-page="budget">Budget</div>
   <div class="tab" data-page="fees">Fees &amp; FX</div>
   <div class="tab" data-page="anomalies">Anomalies</div>
   <div class="tab" data-page="ai-overview">AI Overview</div>
@@ -251,6 +301,27 @@
     <div id="performance-body"></div>
     <div class="subhead">Over time</div>
     <div id="performance-chart"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2>Return by period</h2><button class="info-btn" data-info="perf-period">i</button></div>
+    <div class="info-panel" data-info-panel="perf-period">Trailing time-weighted return for each window, computed by comparing the cumulative TWR at the start and end of the window — the same deposit-neutral method used for the headline TWR figure above. A period is only shown once there's enough history behind it.</div>
+    <div id="performance-periods"></div>
+    <div class="subhead">Monthly returns</div>
+    <div id="performance-monthly"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2>Drawdown</h2><button class="info-btn" data-info="perf-dd">i</button></div>
+    <div class="info-panel" data-info-panel="perf-dd">How far the portfolio's time-weighted value has fallen from its running peak, at any given date — the standard "pain" measure funds report alongside returns. Computed on TWR, not raw account value, so deposits/withdrawals don't distort it.</div>
+    <div id="performance-drawdown-body"></div>
+    <div id="performance-drawdown-chart"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2>Performance by holding</h2><button class="info-btn" data-info="perf-holdings">i</button></div>
+    <div class="info-panel" data-info-panel="perf-holdings">Unrealized P&amp;L per position, from Saxo's own P&amp;L calculation (accurate even without a live market-data feed). Sorted worst to best — the same read used in the AI Overview's "which positions are in the red" analysis.</div>
+    <div id="performance-holdings-table"></div>
   </div>
 </div>
 
@@ -297,10 +368,44 @@
     <div id="spending-body"></div>
   </div>
 
-  <div class="card">
+  <div class="card full-width">
     <div class="card-head"><h2>Transaction history</h2><button class="info-btn" data-info="txns">i</button></div>
     <div class="info-panel" data-info-panel="txns">Every LCL and N26 transaction, newest first. "Bank" shows which account it's on; "Category" is the same classification used in the charts above (income, spending, fee, or internal_transfer for moves like a Livret top-up).</div>
     <div id="transactions-table" style="max-height:420px; overflow-y:auto"></div>
+  </div>
+</div>
+
+<div class="page" id="page-budget">
+  <div class="card">
+    <div class="card-head"><h2>Budget</h2><button class="info-btn" data-info="bud-overview">i</button></div>
+    <div class="info-panel" data-info-panel="bud-overview">A rolling everyday spending tracker, not tied to any specific trip - pick a preset window or an exact custom range below, and every section on this tab (category breakdown, chart, monthly bars, transaction list) updates to match. Same LCL/N26 transactions as the rest of the dashboard, nothing separate to set up. Useful for daily life as much as for a specific period like the Quebec exchange. "Without transfers" (default) hides detected transfers between your own accounts (e.g. towards a Livret) so they don't inflate "Spent" - switch to "With transfers" to see gross cash movement including those.</div>
+    <div id="budget-range-picker"></div>
+    <div id="budget-transfers-toggle"></div>
+    <div id="budget-body"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2>Spending by category</h2><button class="info-btn" data-info="bud-cat">i</button></div>
+    <div class="info-panel" data-info-panel="bud-cat">Same keyword-based categorization as Cash Flow's "Spending by type" (src/spending.py) - one shared classifier for both tabs. Extend SPENDING_KEYWORDS there as new recurring merchants show up, wherever you are.</div>
+    <div id="budget-category-body"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2>Net position over time</h2><button class="info-btn" data-info="bud-net">i</button></div>
+    <div class="info-panel" data-info-panel="bud-net">Cumulative income minus expenses within the selected window - not your total bank balance, which also holds money unrelated to this window.</div>
+    <div id="budget-net-chart"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2>Monthly income/expense</h2><button class="info-btn" data-info="bud-monthly">i</button></div>
+    <div class="info-panel" data-info-panel="bud-monthly">Same view as Cash Flow's monthly chart, scoped to the window selected above.</div>
+    <div id="budget-monthly-chart"></div>
+  </div>
+
+  <div class="card full-width">
+    <div class="card-head"><h2>Transaction history</h2><button class="info-btn" data-info="bud-txns">i</button></div>
+    <div class="info-panel" data-info-panel="bud-txns">Every LCL/N26 transaction within the selected window, newest first.</div>
+    <div id="budget-transactions-table" style="max-height:420px; overflow-y:auto"></div>
   </div>
 </div>
 
@@ -335,8 +440,6 @@
     <div class="card-head"><h2>Anomalies</h2><button class="info-btn" data-info="anom">i</button></div>
     <div class="info-panel" data-info-panel="anom">Automatic checks, nothing more: fees ≥20€, same account/amount/merchant charges within 2 days (possible duplicates — could be legitimate, e.g. two toll crossings), and spending ≥5× your median transaction. Review, don't assume they're errors.</div>
     <div id="anomalies-body"></div>
-    <div class="subhead">Over time</div>
-    <div id="anomalies-history-chart"></div>
   </div>
 </div>
 
@@ -360,6 +463,17 @@ __AI_OVERVIEW_FR__
 
 <script>
 const SUMMARY = __SUMMARY_JSON__;
+
+// toISOString() converts to UTC first - for anyone in a timezone ahead of
+// UTC (e.g. France in summer, UTC+2), local midnight becomes the previous
+// day once formatted, silently shifting any "N days ago" cutoff back by
+// one day. Format from the Date object's own local fields instead.
+function toLocalISODate(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
 
 function fmtEUR(n) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
@@ -710,6 +824,7 @@ function renderPerformance() {
     body.appendChild(el('p', { class: 'empty', text: `No cash activity between ${p.from_date} and ${p.to_date} yet.` }));
     return;
   }
+  const alpha = p.twr != null ? p.twr - p.benchmark.total_return : null;
   const row = el('div', { class: 'kpi-row' });
   row.appendChild(el('div', { class: 'stat-tile' }, [
     el('div', { class: 'label', text: 'XIRR (money-weighted)' }),
@@ -723,12 +838,21 @@ function renderPerformance() {
     el('div', { class: 'label', text: `Benchmark (${p.benchmark.ticker})` }),
     el('div', { class: 'value', text: fmtPct(p.benchmark.total_return, 2) }),
   ]));
+  row.appendChild(el('div', { class: 'stat-tile' }, [
+    el('div', { class: 'label', text: 'Excess return (alpha)' }),
+    el('div', { class: 'value' + (alpha != null ? (alpha >= 0 ? ' good' : ' bad') : ''), text: alpha != null ? fmtPct(alpha, 2) : '–' }),
+  ]));
   body.appendChild(row);
   body.appendChild(el('p', { class: 'hero-sub', text: `${p.from_date} → ${p.to_date} • portfolio value ${fmtEUR(p.final_portfolio_value)}` }));
 
   const chartEl = document.getElementById('performance-chart');
-  if (!p.series || p.series.dates.length < 2) {
+  const hasSeries = p.series && p.series.dates.length >= 2;
+  if (!hasSeries) {
     chartEl.appendChild(el('p', { class: 'empty', text: 'Not enough daily data points yet.' }));
+    document.getElementById('performance-periods').appendChild(el('p', { class: 'empty', text: 'Not enough daily data points yet.' }));
+    document.getElementById('performance-monthly').appendChild(el('p', { class: 'empty', text: 'Not enough daily data points yet.' }));
+    document.getElementById('performance-drawdown-chart').appendChild(el('p', { class: 'empty', text: 'Not enough daily data points yet.' }));
+    renderPerformanceHoldings();
     return;
   }
   const portfolioPoints = p.series.dates.map((d, i) => ({ date: d, value: p.series.portfolio_twr[i] }));
@@ -742,6 +866,156 @@ function renderPerformance() {
     ],
     presets: DAY_PRESETS, defaultIndex: 4, granularity: 'day', includeZero: true,
   });
+
+  renderPerformancePeriods(p.series);
+  renderPerformanceMonthly(p.series);
+  renderPerformanceDrawdown(p.series);
+  renderPerformanceHoldings();
+}
+
+function twrReturnBetween(series, fromIdx, toIdx) {
+  return (1 + series.portfolio_twr[toIdx]) / (1 + series.portfolio_twr[fromIdx]) - 1;
+}
+
+const RETURN_PERIODS = [
+  { label: '1M', days: 30 },
+  { label: '3M', days: 91 },
+  { label: '6M', days: 182 },
+  { label: '1Y', days: 365 },
+];
+
+function renderPerformancePeriods(series) {
+  const container = document.getElementById('performance-periods');
+  container.innerHTML = '';
+  const lastIdx = series.dates.length - 1;
+  const lastDate = new Date(series.dates[lastIdx] + 'T00:00:00');
+  const row = el('div', { class: 'kpi-row' });
+  let shortPeriodsShown = 0;
+
+  for (const period of RETURN_PERIODS) {
+    const cutoff = new Date(lastDate);
+    cutoff.setDate(cutoff.getDate() - period.days);
+    const cutoffStr = toLocalISODate(cutoff);
+    if (series.dates[0] > cutoffStr) continue;
+    const startIdx = series.dates.findIndex(d => d >= cutoffStr);
+    if (startIdx === -1 || startIdx === lastIdx) continue;
+    shortPeriodsShown++;
+    const ret = twrReturnBetween(series, startIdx, lastIdx);
+    row.appendChild(el('div', { class: 'stat-tile' }, [
+      el('div', { class: 'label', text: period.label }),
+      el('div', { class: 'value' + (ret >= 0 ? ' good' : ' bad'), text: fmtPct(ret, 1) }),
+    ]));
+  }
+
+  const sinceRet = twrReturnBetween(series, 0, lastIdx);
+  row.appendChild(el('div', { class: 'stat-tile' }, [
+    el('div', { class: 'label', text: 'Since inception' }),
+    el('div', { class: 'value' + (sinceRet >= 0 ? ' good' : ' bad'), text: fmtPct(sinceRet, 1) }),
+  ]));
+
+  container.appendChild(row);
+  if (shortPeriodsShown < RETURN_PERIODS.length) {
+    container.appendChild(el('p', { class: 'hero-sub', style: 'margin-top:8px', text: 'Shorter windows appear once there is enough history behind them.' }));
+  }
+}
+
+function renderPerformanceMonthly(series) {
+  const container = document.getElementById('performance-monthly');
+  container.innerHTML = '';
+  const lastIdxByMonth = {};
+  series.dates.forEach((d, i) => { lastIdxByMonth[d.slice(0, 7)] = i; });
+  const months = Object.keys(lastIdxByMonth).sort();
+  if (months.length < 2) {
+    container.appendChild(el('p', { class: 'empty', text: 'History builds up as you re-run the tracker over time.' }));
+    return;
+  }
+
+  const returns = [];
+  for (let i = 1; i < months.length; i++) {
+    returns.push({
+      month: months[i],
+      ret: twrReturnBetween(series, lastIdxByMonth[months[i - 1]], lastIdxByMonth[months[i]]),
+    });
+  }
+  const maxAbs = Math.max(...returns.map(r => Math.abs(r.ret)), 0.01);
+  const H = 90, half = H / 2 - 4;
+
+  const chart = el('div', { class: 'returns-chart', style: `height:${H + 20}px` });
+  chart.appendChild(el('div', { class: 'returns-zero', style: `top:${H / 2}px` }));
+  for (const r of returns) {
+    const col = el('div', { class: 'returns-col' });
+    const barWrap = el('div', { class: 'returns-bar-wrap', style: `height:${H}px` });
+    const barH = Math.max(2, Math.abs(r.ret) / maxAbs * half);
+    const bar = el('div', {
+      class: 'returns-bar' + (r.ret >= 0 ? ' up' : ' down'),
+      style: r.ret >= 0
+        ? `height:${barH}px; bottom:${H / 2}px`
+        : `height:${barH}px; top:${H / 2}px`,
+    });
+    barWrap.appendChild(bar);
+    col.appendChild(barWrap);
+    col.appendChild(el('div', { class: 'returns-label', text: r.month.slice(5) + '/' + r.month.slice(2, 4) }));
+    chart.appendChild(col);
+  }
+  container.appendChild(chart);
+}
+
+function renderPerformanceDrawdown(series) {
+  const bodyEl = document.getElementById('performance-drawdown-body');
+  const chartEl = document.getElementById('performance-drawdown-chart');
+  bodyEl.innerHTML = '';
+  chartEl.innerHTML = '';
+
+  let peak = -Infinity;
+  const ddPoints = series.dates.map((d, i) => {
+    const growth = 1 + series.portfolio_twr[i];
+    peak = Math.max(peak, growth);
+    return { date: d, value: growth / peak - 1 };
+  });
+  const maxDd = Math.min(...ddPoints.map(pt => pt.value));
+  const currentDd = ddPoints[ddPoints.length - 1].value;
+
+  const row = el('div', { class: 'kpi-row' });
+  row.appendChild(el('div', { class: 'stat-tile' }, [
+    el('div', { class: 'label', text: 'Max drawdown' }),
+    el('div', { class: 'value' + (maxDd < -0.001 ? ' bad' : ''), text: fmtPct(maxDd, 1) }),
+  ]));
+  row.appendChild(el('div', { class: 'stat-tile' }, [
+    el('div', { class: 'label', text: 'Current, from peak' }),
+    el('div', { class: 'value' + (currentDd < -0.001 ? ' bad' : ' good'), text: fmtPct(currentDd, 1) }),
+  ]));
+  bodyEl.appendChild(row);
+
+  renderTimeSeriesSection(chartEl, {
+    series: [{ label: 'Drawdown', points: ddPoints, colorVar: 'var(--series-6)' }],
+    presets: DAY_PRESETS, defaultIndex: 4, granularity: 'day', includeZero: true,
+  });
+}
+
+function renderPerformanceHoldings() {
+  const container = document.getElementById('performance-holdings-table');
+  container.innerHTML = '';
+  const funds = (SUMMARY.etf_allocation.by_fund || []).slice().sort((a, b) => a.pnl_pct - b.pnl_pct);
+  if (!funds.length) { container.appendChild(el('p', { class: 'empty', text: 'No data yet.' })); return; }
+
+  const table = el('table');
+  table.appendChild(el('thead', {}, el('tr', {}, [
+    el('th', { text: 'Fund' }), el('th', { text: 'Weight' }), el('th', { text: 'Value' }),
+    el('th', { text: 'P&L' }), el('th', { text: 'P&L %' }),
+  ])));
+  const tbody = el('tbody');
+  for (const f of funds) {
+    const cls = f.pnl_eur >= 0 ? 'good' : 'bad';
+    tbody.appendChild(el('tr', {}, [
+      el('td', { text: f.symbol + ' — ' + f.description }),
+      el('td', { class: 'num', text: f.weight_pct.toFixed(1) + '%' }),
+      el('td', { class: 'num', text: fmtEUR(f.value_eur) }),
+      el('td', { class: 'num ' + cls, text: (f.pnl_eur >= 0 ? '+' : '') + fmtEUR2(f.pnl_eur) }),
+      el('td', { class: 'num ' + cls, text: (f.pnl_pct >= 0 ? '+' : '') + f.pnl_pct.toFixed(1) + '%' }),
+    ]));
+  }
+  table.appendChild(tbody);
+  container.appendChild(table);
 }
 
 // Geography can grow an open-ended list of countries as more funds are
@@ -795,6 +1069,44 @@ function renderAllocation() {
   renderAllocationHistory(document.getElementById('sector-history-chart'), alloc.history || [], 'by_sector_pct');
 }
 
+// A single shared y-axis across categories with very different absolute
+// weights (e.g. US ~38% vs Finland ~0.1%) crushes each category's own
+// day-to-day drift down to an invisible sliver - that's what read as "flat
+// horizontal lines that show nothing". Each row gets its own independently
+// auto-scaled sparkline instead, so real movement stays visible regardless
+// of that category's absolute size, plus an explicit delta figure.
+function renderSparkline(container, points, colorVar) {
+  container.innerHTML = '';
+  const w = 160, h = 32, pad = 3;
+  const values = points.map(p => p.value);
+  const min = Math.min(...values), max = Math.max(...values);
+  const range = (max - min) || 1;
+  const n = points.length;
+  const x = i => pad + (n === 1 ? (w - 2 * pad) / 2 : (i / (n - 1)) * (w - 2 * pad));
+  const y = v => h - pad - ((v - min) / range) * (h - 2 * pad);
+
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  svg.setAttribute('preserveAspectRatio', 'none');
+
+  const path = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${x(i)},${y(p.value)}`).join(' ');
+  const lineEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  lineEl.setAttribute('d', path);
+  lineEl.setAttribute('fill', 'none');
+  lineEl.setAttribute('stroke', colorVar);
+  lineEl.setAttribute('stroke-width', '1.75');
+  lineEl.setAttribute('stroke-linejoin', 'round');
+  lineEl.setAttribute('stroke-linecap', 'round');
+  svg.appendChild(lineEl);
+
+  const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  dot.setAttribute('cx', x(n - 1)); dot.setAttribute('cy', y(points[n - 1].value));
+  dot.setAttribute('r', 2.5); dot.setAttribute('fill', colorVar);
+  svg.appendChild(dot);
+
+  container.appendChild(svg);
+}
+
 function renderAllocationHistory(container, history, key) {
   container.innerHTML = '';
   if (history.length < 2) {
@@ -805,12 +1117,28 @@ function renderAllocationHistory(container, history, key) {
     .sort(([, a], [, b]) => b - a)
     .slice(0, ALLOCATION_TOP_N)
     .map(([cat]) => cat);
-  const series = categories.map((cat, i) => ({
-    label: cat,
-    points: history.map(h => ({ date: h.date, value: h[key][cat] || 0 })),
-    colorVar: `var(${SERIES[i % SERIES.length]})`,
-  }));
-  renderTimeSeriesSection(container, { series, presets: DAY_PRESETS, defaultIndex: 4, granularity: 'day' });
+
+  const list = el('div', { class: 'sparkline-list' });
+  categories.forEach((cat, i) => {
+    const points = history.map(h => ({ date: h.date, value: h[key][cat] || 0 }));
+    const last = points[points.length - 1].value;
+    const delta = last - points[0].value;
+    const deltaClass = delta > 0.05 ? ' up' : delta < -0.05 ? ' down' : '';
+
+    const row = el('div', { class: 'sparkline-row' });
+    row.appendChild(el('div', { class: 'sparkline-label', text: cat }));
+    const chartWrap = el('div', { class: 'sparkline-chart' });
+    row.appendChild(chartWrap);
+    row.appendChild(el('div', { class: 'sparkline-now', text: last.toFixed(1) + '%' }));
+    row.appendChild(el('div', {
+      class: 'sparkline-delta' + deltaClass,
+      text: (delta > 0 ? '+' : '') + delta.toFixed(1) + 'pt',
+    }));
+    list.appendChild(row);
+    renderSparkline(chartWrap, points, `var(${SERIES[i % SERIES.length]})`);
+  });
+  container.appendChild(list);
+  container.appendChild(el('p', { class: 'hero-sub', style: 'margin-top:10px', text: `${history[0].date} → ${history[history.length - 1].date} · each row scaled to its own range` }));
 }
 
 function renderCashflow() {
@@ -867,6 +1195,221 @@ function renderTransactionsTable() {
   }
   table.appendChild(tbody);
   container.appendChild(table);
+}
+
+// A universal rolling spending tracker (not tied to any specific trip) -
+// all computation happens client-side over SUMMARY.transactions for
+// whichever window is selected, so switching ranges is instant with no
+// rebuild. 30 days is the default; presets give quick shortcuts to more
+// or less, and Custom takes an exact start/end date.
+const BUDGET_PRESETS = [
+  { label: '7D', days: 7 },
+  { label: '30D', days: 30 },
+  { label: '90D', days: 90 },
+  { label: '1Y', days: 365 },
+  { label: 'All', days: null },
+  { label: 'Custom', days: 'custom' },
+];
+const BUDGET_DEFAULT_INDEX = 1;
+
+function renderBudget() {
+  const pickerEl = document.getElementById('budget-range-picker');
+  const toggleEl = document.getElementById('budget-transfers-toggle');
+  pickerEl.innerHTML = '';
+  toggleEl.innerHTML = '';
+
+  // "internal_transfer" = detected moves between the user's own accounts
+  // (e.g. towards a Livret) - excluded by default so shuffling money
+  // between your own accounts doesn't read as spending, but included when
+  // the switch is on, for whoever wants to see gross cash movement.
+  const withoutTransfers = (SUMMARY.transactions || []).filter(t => t.category === 'income' || t.category === 'spending');
+  const withTransfers = (SUMMARY.transactions || []).filter(t => t.category === 'income' || t.category === 'spending' || t.category === 'internal_transfer');
+  if (!withoutTransfers.length) {
+    pickerEl.appendChild(el('p', { class: 'empty', text: 'No data yet.' }));
+    renderBudgetContent([], null, null);
+    return;
+  }
+  const sortedAll = withTransfers.slice().sort((a, b) => a.date.localeCompare(b.date));
+  const firstDate = sortedAll[0].date;
+  const lastDate = sortedAll[sortedAll.length - 1].date;
+
+  let includeTransfers = false;
+  let currentStart = null;
+  let currentEnd = null;
+
+  const bar = el('div', { class: 'range-picker' });
+  const customRow = el('div', { class: 'custom-range' });
+  const startInput = el('input', { type: 'date' });
+  const endInput = el('input', { type: 'date' });
+  startInput.value = lastDate;
+  endInput.value = lastDate;
+  const applyBtn = el('button', { text: 'Apply' });
+  customRow.appendChild(document.createTextNode('From'));
+  customRow.appendChild(startInput);
+  customRow.appendChild(document.createTextNode('to'));
+  customRow.appendChild(endInput);
+  customRow.appendChild(applyBtn);
+
+  function applyWindow(startDate, endDate) {
+    currentStart = startDate;
+    currentEnd = endDate;
+    const source = includeTransfers ? withTransfers : withoutTransfers;
+    const windowTxns = source.filter(t => t.date >= startDate && t.date <= endDate);
+    renderBudgetContent(windowTxns, startDate, endDate);
+  }
+
+  BUDGET_PRESETS.forEach((preset, i) => {
+    const btn = el('button', { class: 'range-btn' + (i === BUDGET_DEFAULT_INDEX ? ' active' : ''), text: preset.label });
+    btn.addEventListener('click', () => {
+      bar.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (preset.days === 'custom') {
+        customRow.classList.add('open');
+        startInput.value = firstDate;
+        endInput.value = lastDate;
+        applyWindow(firstDate, lastDate);
+      } else {
+        customRow.classList.remove('open');
+        let startDate = firstDate;
+        if (preset.days != null) {
+          const cutoff = new Date(lastDate + 'T00:00:00');
+          cutoff.setDate(cutoff.getDate() - preset.days);
+          startDate = toLocalISODate(cutoff);
+        }
+        applyWindow(startDate, lastDate);
+      }
+    });
+    bar.appendChild(btn);
+  });
+  applyBtn.addEventListener('click', () => {
+    if (startInput.value && endInput.value) applyWindow(startInput.value, endInput.value);
+  });
+
+  pickerEl.appendChild(bar);
+  pickerEl.appendChild(customRow);
+
+  const transferBar = el('div', { class: 'range-picker' });
+  const withoutBtn = el('button', { class: 'range-btn active', text: 'Without transfers' });
+  const withBtn = el('button', { class: 'range-btn', text: 'With transfers' });
+  withoutBtn.addEventListener('click', () => {
+    includeTransfers = false;
+    withoutBtn.classList.add('active');
+    withBtn.classList.remove('active');
+    applyWindow(currentStart, currentEnd);
+  });
+  withBtn.addEventListener('click', () => {
+    includeTransfers = true;
+    withBtn.classList.add('active');
+    withoutBtn.classList.remove('active');
+    applyWindow(currentStart, currentEnd);
+  });
+  transferBar.appendChild(withoutBtn);
+  transferBar.appendChild(withBtn);
+  const toggleRow = el('div', { class: 'transfers-toggle' }, [
+    transferBar,
+    el('span', { class: 'hint', text: 'transfers between your own accounts (e.g. towards a Livret)' }),
+  ]);
+  toggleEl.appendChild(toggleRow);
+
+  const initial = BUDGET_PRESETS[BUDGET_DEFAULT_INDEX];
+  const cutoff = new Date(lastDate + 'T00:00:00');
+  cutoff.setDate(cutoff.getDate() - initial.days);
+  applyWindow(toLocalISODate(cutoff), lastDate);
+}
+
+function renderBudgetContent(windowTxns, startDate, endDate) {
+  const bodyEl = document.getElementById('budget-body');
+  const catEl = document.getElementById('budget-category-body');
+  const netChartEl = document.getElementById('budget-net-chart');
+  const monthlyChartEl = document.getElementById('budget-monthly-chart');
+  const txnsEl = document.getElementById('budget-transactions-table');
+  [bodyEl, catEl, netChartEl, monthlyChartEl, txnsEl].forEach(target => { target.innerHTML = ''; });
+
+  const sorted = windowTxns.slice().sort((a, b) => a.date.localeCompare(b.date));
+  if (!sorted.length) {
+    bodyEl.appendChild(el('p', { class: 'empty', text: 'No transactions in this range.' }));
+    for (const target of [catEl, netChartEl, monthlyChartEl, txnsEl]) {
+      target.appendChild(el('p', { class: 'empty', text: 'No data yet.' }));
+    }
+    return;
+  }
+
+  let totalIncome = 0;
+  let running = 0;
+  const byCategory = {};
+  const byMonth = {};
+  const balancePoints = [];
+
+  for (const t of sorted) {
+    const month = t.date.slice(0, 7);
+    if (!byMonth[month]) byMonth[month] = { income: 0, expense: 0 };
+    const isInflow = t.category === 'income' || (t.category === 'internal_transfer' && t.amount > 0);
+    if (isInflow) {
+      totalIncome += t.amount;
+      byMonth[month].income += t.amount;
+    } else {
+      byMonth[month].expense += -t.amount;
+      const type = t.category === 'internal_transfer' ? 'transfer_to_own_account' : (t.spending_type || 'other');
+      byCategory[type] = (byCategory[type] || 0) + -t.amount;
+    }
+    running += t.amount;
+    balancePoints.push({ date: t.date, value: Math.round(running * 100) / 100 });
+  }
+  const totalExpense = Object.values(byCategory).reduce((s, v) => s + v, 0);
+  const days = Math.round((new Date(endDate + 'T00:00:00') - new Date(startDate + 'T00:00:00')) / 86400000) + 1;
+  const avgDailySpend = totalExpense / days;
+
+  const row = el('div', { class: 'kpi-row' });
+  row.appendChild(el('div', { class: 'stat-tile' }, [el('div', { class: 'label', text: 'Spent' }), el('div', { class: 'value', text: fmtEUR(totalExpense) })]));
+  row.appendChild(el('div', { class: 'stat-tile' }, [el('div', { class: 'label', text: 'Income' }), el('div', { class: 'value', text: fmtEUR(totalIncome) })]));
+  row.appendChild(el('div', { class: 'stat-tile' }, [el('div', { class: 'label', text: 'Net' }), el('div', { class: 'value' + (running >= 0 ? ' good' : ' bad'), text: fmtEUR(running) })]));
+  row.appendChild(el('div', { class: 'stat-tile' }, [el('div', { class: 'label', text: 'Avg daily spend' }), el('div', { class: 'value', text: fmtEUR2(avgDailySpend) })]));
+  bodyEl.appendChild(row);
+  bodyEl.appendChild(el('p', { class: 'hero-sub', text: `${startDate} → ${endDate} • ${days} day${days === 1 ? '' : 's'}` }));
+
+  const catItems = Object.entries(byCategory).sort(([, a], [, b]) => b - a).map(([label, value]) => ({ label, value }));
+  if (catItems.length) renderSequentialBars(catEl, catItems, fmtEUR);
+  else catEl.appendChild(el('p', { class: 'empty', text: 'No spending in this range.' }));
+
+  const months = Object.entries(byMonth).sort(([a], [b]) => a.localeCompare(b));
+  const max = Math.max(...months.flatMap(([, v]) => [v.income, v.expense]), 1);
+  const chart = el('div', { class: 'month-chart' });
+  for (const [month, v] of months) {
+    const col = el('div', { class: 'month-col' });
+    const bars = el('div', { class: 'month-bars' });
+    bars.appendChild(el('div', { class: 'bar', style: `height:${v.income / max * 100}px; background:var(--series-1)` }));
+    bars.appendChild(el('div', { class: 'bar', style: `height:${v.expense / max * 100}px; background:var(--series-6)` }));
+    col.appendChild(bars);
+    col.appendChild(el('div', { class: 'month-label', text: month.slice(5) + '/' + month.slice(2, 4) }));
+    chart.appendChild(col);
+  }
+  monthlyChartEl.appendChild(chart);
+  monthlyChartEl.appendChild(el('div', { class: 'legend', style: 'margin-top:10px' }, [
+    el('span', { class: 'item' }, [el('span', { class: 'swatch', style: 'background:var(--series-1)' }), document.createTextNode('Income')]),
+    el('span', { class: 'item' }, [el('span', { class: 'swatch', style: 'background:var(--series-6)' }), document.createTextNode('Expense')]),
+  ]));
+
+  if (balancePoints.length >= 2) {
+    renderMultiLineChart(netChartEl, [{ label: 'Net position', points: balancePoints, colorVar: 'var(--series-1)' }], { includeZero: true });
+  } else {
+    netChartEl.appendChild(el('p', { class: 'empty', text: 'Not enough transactions in this range for a chart.' }));
+  }
+
+  const table = el('table');
+  table.appendChild(el('thead', {}, el('tr', {}, [
+    el('th', { text: 'Date' }), el('th', { text: 'Bank' }), el('th', { text: 'Amount' }), el('th', { text: 'Description' }),
+  ])));
+  const tbody = el('tbody');
+  for (const t of sorted.slice().reverse()) {
+    tbody.appendChild(el('tr', {}, [
+      el('td', { text: t.date }),
+      el('td', { text: t.account }),
+      el('td', { class: 'num', text: fmtEUR2(t.amount) }),
+      el('td', { text: t.description, style: 'white-space:normal; max-width:280px' }),
+    ]));
+  }
+  table.appendChild(tbody);
+  txnsEl.appendChild(table);
 }
 
 function renderFees() {
@@ -950,24 +1493,6 @@ function renderAnomalies() {
     body.appendChild(ul);
   }
   if (!any) body.appendChild(el('p', { class: 'empty', text: 'Nothing flagged.' }));
-
-  const allDates = [
-    ...a.large_fees.map(t => t.date),
-    ...a.possible_duplicates.map(t => t.date_b),
-    ...a.outlier_spending.map(t => t.date),
-  ];
-  const counts = {};
-  for (const d of allDates) { const m = d.slice(0, 7); counts[m] = (counts[m] || 0) + 1; }
-  const months = Object.entries(counts).sort(([x], [y]) => x.localeCompare(y));
-  const chartEl = document.getElementById('anomalies-history-chart');
-  if (months.length < 2) {
-    chartEl.appendChild(el('p', { class: 'empty', text: 'History builds up as you re-run the tracker over time.' }));
-  } else {
-    renderTimeSeriesSection(chartEl, {
-      series: [{ label: 'Anomalies', points: months.map(([m, c]) => ({ date: m + '-01', value: c })), colorVar: 'var(--series-7)' }],
-      presets: MONTH_PRESETS, defaultIndex: 3, granularity: 'month',
-    });
-  }
 }
 
 document.getElementById('generated').textContent = 'Generated ' + new Date(SUMMARY.generated_at).toLocaleString();
@@ -975,6 +1500,7 @@ renderNetWorth();
 renderPerformance();
 renderAllocation();
 renderCashflow();
+renderBudget();
 renderFees();
 renderFxCost();
 renderAnomalies();

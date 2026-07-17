@@ -110,6 +110,31 @@ whole workflow going forward. The background server has no "quit" from
 the app itself; it's harmless (127.0.0.1-only) but stays running until the
 Mac restarts or you kill it by hand (`ps aux | grep serve_dashboard`).
 
+## The "Budget" tab
+
+A universal, rolling everyday spending tracker - not tied to any specific
+trip or period. Defaults to the last 30 days; other presets (7D/90D/1Y/All)
+show more or less, and "Custom" takes an exact start/end date. Every
+section on the tab (spend/income/net stats, spending by category, monthly
+bars, a net-position chart, the transaction list) recomputes instantly for
+whichever window is selected - entirely client-side over the transactions
+already embedded in `summary.json`, so switching ranges needs no rebuild.
+Uses the same LCL/N26 transactions and the same category classifier as
+the Cash Flow tab (`src/spending.py`'s `SPENDING_KEYWORDS`, which now
+covers both everyday French merchants and Canadian ones for the Quebec
+exchange) - one shared list, extend it as new recurring merchants show up
+wherever you are. No pre-entered budget target - by choice, this is
+actual-spending tracking only, useful for daily life as much as for a
+specific trip.
+
+A "Without transfers" / "With transfers" switch (default: without) hides
+or shows transactions Enable Banking's normalization already flags as
+`internal_transfer` - moves between your own accounts (e.g. towards a
+Livret), detected in `src/enablebanking/normalize.py` by checking whether
+a VIR/VIREMENT-prefixed transaction's remittance text contains your own
+surname. Without it, these would otherwise inflate "Spent" with money that
+never actually left your own pocket.
+
 ## The "AI Overview" tab
 
 `dashboard/ai_overview.en.html` / `dashboard/ai_overview.fr.html` are a

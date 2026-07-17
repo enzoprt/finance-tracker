@@ -18,6 +18,8 @@ def build_etf_allocation_report(holdings: List[dict]) -> dict:
                 "description": h["description"],
                 "value_eur": round(h["value_eur"], 2),
                 "weight_pct": round(h["value_eur"] / total_value * 100, 2) if total_value else 0,
+                "pnl_eur": round(h["pnl_eur"], 2),
+                "pnl_pct": round(h["pnl_pct"], 2),
             }
             for h in holdings
         ),

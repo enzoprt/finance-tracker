@@ -29,14 +29,14 @@ from src.fees import build_fee_report  # noqa: E402
 from src.fx_cost import build_fx_cost_report  # noqa: E402
 from src.livrets import load_config as load_livret_config  # noqa: E402
 from src.livrets import reconcile_livrets  # noqa: E402
-from src.model import Transaction  # noqa: E402
+from src.model import CATEGORY_SPENDING, Transaction  # noqa: E402
 from src.networth import build_net_worth  # noqa: E402
 from src.performance import compute_xirr  # noqa: E402
 from src.saxo.client import SaxoClient  # noqa: E402
 from src.saxo.instruments import fetch_etf_holdings  # noqa: E402
 from src.saxo.normalize import normalize_trades  # noqa: E402
 from src.saxo.performance import fetch_performance_timeseries  # noqa: E402
-from src.spending import build_cashflow_report  # noqa: E402
+from src.spending import build_cashflow_report, spending_type_for  # noqa: E402
 
 SUMMARY_FILE = DATA_DIR / "summary.json"
 NET_WORTH_HISTORY_FILE = DATA_DIR / "net_worth_history.json"
@@ -184,7 +184,17 @@ def main() -> None:
     ETF_ALLOCATION_HISTORY_FILE.write_text(json.dumps(allocation_history, indent=2, ensure_ascii=False))
     etf_allocation_report["history"] = allocation_history
 
-    bank_transactions = [t.to_dict() for t in all_transactions if t.account != "Saxo"]
+    bank_transactions = []
+    for t in all_transactions:
+        if t.account == "Saxo":
+            continue
+        d = t.to_dict()
+        # Enrich with the same per-category classification used for the
+        # Cash Flow "Spending by type" card, so the Budget tab can regroup
+        # by category for any client-side-selected date window without
+        # duplicating the keyword classifier in JS.
+        d["spending_type"] = spending_type_for(t.description) if t.category == CATEGORY_SPENDING else None
+        bank_transactions.append(d)
 
     summary = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
