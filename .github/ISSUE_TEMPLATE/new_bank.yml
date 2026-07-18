@@ -1,0 +1,47 @@
+name: New bank / country support
+description: Request or propose support for a bank not covered yet
+labels: ["enhancement", "bank-support"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Only two banks (LCL, N26) are wired up today, and adding a
+        different one is a real code change, not just new credentials -
+        see `CLAUDE.md` section 3 for exactly what's involved (fee-keyword
+        detection, the net-worth function's signature, the ASPSP country
+        default, transfer-detection vocabulary). This template is for
+        either requesting it or proposing to build it yourself.
+  - type: input
+    id: bank
+    attributes:
+      label: Bank name
+    validations:
+      required: true
+  - type: input
+    id: country
+    attributes:
+      label: Country
+    validations:
+      required: true
+  - type: dropdown
+    id: coverage
+    attributes:
+      label: Is this bank covered by Enable Banking?
+      description: Check Enable Banking's ASPSP list (or run `scripts/list_aspsps_fr.py`, adapted for the right country) if unsure.
+      options:
+        - "Yes, confirmed"
+        - "Not sure"
+        - "No - it's outside Europe / not on Enable Banking"
+    validations:
+      required: true
+  - type: textarea
+    id: samples
+    attributes:
+      label: Sample transaction descriptions (with amounts/names redacted)
+      description: If you have real (redacted) examples of this bank's fee/transfer/foreign-currency transaction text, they're the most useful thing you can share - the keyword detection is validated against real formats, not guessed.
+  - type: checkboxes
+    id: offer
+    attributes:
+      label: Are you offering to build this yourself?
+      options:
+        - label: "I'd like to submit a PR for this"

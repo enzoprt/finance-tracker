@@ -1,0 +1,30 @@
+name: Feature request
+description: Propose an improvement or a new idea
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's missing or annoying?
+      description: What can't you do today, or what's clunky about how it works now?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like instead?
+      description: Your idea for how it should work. Sketches, mockups, or references to similar tools all help.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Dashboard (a tab or chart)
+        - New bank support
+        - New broker support
+        - Backend / data pipeline
+        - Something else
+    validations:
+      required: true

@@ -1,0 +1,35 @@
+name: Bug report
+description: Something doesn't work the way it should
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing: never paste real account numbers, IBANs, tokens, or
+        screenshots containing your real financial data. If a screenshot
+        helps, reproduce the bug with fake numbers first (see
+        `CONTRIBUTING.md` for how the README's own screenshots were made).
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect, and what actually happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: Steps to reproduce, or which script/tab it happened in.
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Where (tab, script, or file)
+      placeholder: e.g. "Budget tab" or "scripts/build_summary.py"
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else
+      description: Bank(s) involved, OS, Python version, or anything else relevant.

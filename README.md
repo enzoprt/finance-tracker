@@ -1,10 +1,17 @@
 # Finance Tracker
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
 Personal financial dashboard aggregating a Saxo Bank brokerage account (ETFs)
 and two bank accounts (LCL, N26). Backend runs locally in Python and writes a
 single `data/summary.json`; a static single-file dashboard reads that JSON
 data embedded inline (no fetch, no live API calls, no credentials in the
 browser) and is synced to iCloud Drive for use on iPhone.
+
+Free, MIT-licensed, and open to contributions - see
+[`CONTRIBUTING.md`](CONTRIBUTING.md) if you'd like to propose an
+improvement or add support for your own bank.
 
 Picking this up for a **different person**? See [`CLAUDE.md`](CLAUDE.md)
 first - it's a checklist of everything specific to the original setup
@@ -191,3 +198,17 @@ after a meaningful change (new funds, a big deposit, months of new
 transaction history), ask a Claude Code session to re-read the latest
 `data/summary.json` plus the real Saxo account structure and rewrite both
 files - they won't update on their own.
+
+## Contributing
+
+Bug reports, feature requests, and PRs are all welcome - see
+[`CONTRIBUTING.md`](CONTRIBUTING.md) for the practical details (how to
+propose something, what's especially wanted like more bank support, and
+the ground rules for any change - mainly: never commit real financial
+data). If you're extending anything bank- or broker-related,
+[`CLAUDE.md`](CLAUDE.md) documents exactly what's currently hardcoded to
+the original setup and what a real "add a new bank" change involves.
+
+## License
+
+[MIT](LICENSE) - free to use, modify, and redistribute.

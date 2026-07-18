@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Just want to discuss an idea first?
+    url: https://github.com/enzoprt/finance-tracker/discussions
+    about: Open-ended ideas, questions, or "would this even be a good fit" - no template needed.
