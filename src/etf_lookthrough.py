@@ -93,6 +93,25 @@ def known_single_geography(description: str) -> Optional[str]:
     return None
 
 
+def fetch_fund_ter(fund_data, yahoo_ticker: str) -> Optional[float]:
+    """Annual ongoing-charges ratio ("TER") as a fraction (0.002 = 0.20%),
+    read off the same funds_data object fetch_fund_lookthrough() already
+    pulled sector/holdings from - no extra network call. None if missing;
+    a handful of listings (seen on some Swiss/Milan tickers) return an
+    implausible 0.0 rather than actually being free, so that's treated as
+    missing too rather than a real value."""
+    try:
+        ops = fund_data.fund_operations
+    except Exception:
+        return None
+    if ops is None or "Annual Report Expense Ratio" not in ops.index:
+        return None
+    ter = ops.loc["Annual Report Expense Ratio", yahoo_ticker]
+    if ter is None or ter <= 0:
+        return None
+    return float(ter)
+
+
 def fetch_fund_lookthrough(yahoo_ticker: str) -> dict:
     fund_data = yf.Ticker(yahoo_ticker).funds_data
     sector_weightings = fund_data.sector_weightings or {}
@@ -103,7 +122,8 @@ def fetch_fund_lookthrough(yahoo_ticker: str) -> dict:
         for symbol, row in top_holdings_df.iterrows():
             holdings.append({"symbol": symbol, "weight": float(row["Holding Percent"])})
 
-    return {"sector_weightings": sector_weightings, "top_holdings": holdings}
+    ter = fetch_fund_ter(fund_data, yahoo_ticker)
+    return {"sector_weightings": sector_weightings, "top_holdings": holdings, "ter": ter}
 
 
 def build_lookthrough_report(holdings: List[dict]) -> dict:
@@ -113,6 +133,7 @@ def build_lookthrough_report(holdings: List[dict]) -> dict:
     country_totals: dict = defaultdict(float)
     total_value = sum(h["value_eur"] for h in holdings)
     errors = []
+    ter_by_symbol: dict = {}
 
     for h in holdings:
         fund_value = h["value_eur"]
@@ -128,6 +149,8 @@ def build_lookthrough_report(holdings: List[dict]) -> dict:
             if not single_country:
                 country_totals[OTHER_HOLDINGS_LABEL] += fund_value
             continue
+
+        ter_by_symbol[h["symbol"]] = data["ter"]
 
         if data["sector_weightings"]:
             for sector, weight in data["sector_weightings"].items():
@@ -153,4 +176,5 @@ def build_lookthrough_report(holdings: List[dict]) -> dict:
         "by_sector_pct": to_pct(sector_totals),
         "by_country_pct": to_pct(country_totals),
         "errors": errors,
+        "ter_by_symbol": ter_by_symbol,
     }

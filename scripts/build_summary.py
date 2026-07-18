@@ -25,6 +25,7 @@ from src.enablebanking.auth import load_session  # noqa: E402
 from src.enablebanking.client import EnableBankingClient  # noqa: E402
 from src.enablebanking.normalize import normalize_transactions, pick_current_balance  # noqa: E402
 from src.etf_allocation import build_etf_allocation_report  # noqa: E402
+from src.etf_fees import FRENCH_CTO_FLAT_TAX_RATE, build_etf_fees_report  # noqa: E402
 from src.fees import build_fee_report  # noqa: E402
 from src.fx_cost import build_fx_cost_report  # noqa: E402
 from src.livrets import load_config as load_livret_config  # noqa: E402
@@ -36,7 +37,7 @@ from src.saxo.client import SaxoClient  # noqa: E402
 from src.saxo.instruments import fetch_etf_holdings  # noqa: E402
 from src.saxo.normalize import normalize_trades  # noqa: E402
 from src.saxo.performance import fetch_performance_timeseries  # noqa: E402
-from src.spending import build_cashflow_report, spending_type_for  # noqa: E402
+from src.spending import merchant_for, spending_subtype_for  # noqa: E402
 
 SUMMARY_FILE = DATA_DIR / "summary.json"
 NET_WORTH_HISTORY_FILE = DATA_DIR / "net_worth_history.json"
@@ -123,6 +124,19 @@ def main() -> None:
         n26_currency=bank_balances["N26"]["currency"],
         livret_balances=livret_result["balances"],
     )
+    # Cash accounts (LCL/N26/Livrets) owe no capital-gains tax; only the
+    # ETF portfolio's unrealized gains would, at France's 30% flat PFU
+    # rate, if sold today - same assumption as the Performance tab's ETF
+    # fees card (PEA/PEA-PME both empty, everything sits in the taxable
+    # CTO). Losses owe nothing, no loss-offset modeled. Estimated, not a
+    # real number - added to `net_worth` before it's appended to history,
+    # so it's available for a future "after tax" toggle on that chart too.
+    estimated_tax_eur = round(
+        sum(h["pnl_eur"] for h in etf_holdings if h["pnl_eur"] > 0) * FRENCH_CTO_FLAT_TAX_RATE, 2
+    )
+    net_worth["estimated_tax_eur"] = estimated_tax_eur
+    net_worth["total_after_tax_eur"] = round(net_worth["total_eur"] - estimated_tax_eur, 2)
+
     history = (
         json.loads(NET_WORTH_HISTORY_FILE.read_text()) if NET_WORTH_HISTORY_FILE.is_file() else []
     )
@@ -163,10 +177,10 @@ def main() -> None:
 
     # --- Other reports (reuse the transactions fetched above) ---
     fee_report = build_fee_report(all_transactions)
-    cashflow_report = build_cashflow_report(all_transactions)
     fx_cost_report = build_fx_cost_report(all_transactions)
     anomaly_report = build_anomaly_report(all_transactions)
     etf_allocation_report = build_etf_allocation_report(etf_holdings)
+    etf_fees_report = build_etf_fees_report(etf_holdings, etf_allocation_report.pop("ter_by_symbol"))
 
     allocation_snapshot = {
         "date": net_worth["date"],
@@ -189,11 +203,15 @@ def main() -> None:
         if t.account == "Saxo":
             continue
         d = t.to_dict()
-        # Enrich with the same per-category classification used for the
-        # Cash Flow "Spending by type" card, so the Budget tab can regroup
-        # by category for any client-side-selected date window without
+        # Enrich with the category/subcategory classification so the
+        # Budget tab can regroup by category (and reveal subcategories on
+        # hover) for any client-side-selected date window without
         # duplicating the keyword classifier in JS.
-        d["spending_type"] = spending_type_for(t.description) if t.category == CATEGORY_SPENDING else None
+        if t.category == CATEGORY_SPENDING:
+            d["spending_type"], d["spending_subtype"] = spending_subtype_for(t.description)
+            d["spending_merchant"] = merchant_for(t.description)
+        else:
+            d["spending_type"], d["spending_subtype"], d["spending_merchant"] = None, None, None
         bank_transactions.append(d)
 
     summary = {
@@ -202,10 +220,10 @@ def main() -> None:
         "net_worth_history": history,
         "performance": performance,
         "fees": fee_report,
-        "cash_flow": cashflow_report,
         "fx_cost": fx_cost_report,
         "anomalies": anomaly_report,
         "etf_allocation": etf_allocation_report,
+        "etf_fees": etf_fees_report,
         "transactions": bank_transactions,
     }
 

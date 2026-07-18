@@ -34,4 +34,5 @@ def build_etf_allocation_report(holdings: List[dict]) -> dict:
         "by_geography_pct": lookthrough["by_country_pct"],
         "by_sector_pct": lookthrough["by_sector_pct"],
         "lookthrough_errors": lookthrough["errors"],
+        "ter_by_symbol": lookthrough["ter_by_symbol"],
     }

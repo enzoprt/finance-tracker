@@ -6,6 +6,11 @@ single `data/summary.json`; a static single-file dashboard reads that JSON
 data embedded inline (no fetch, no live API calls, no credentials in the
 browser) and is synced to iCloud Drive for use on iPhone.
 
+Picking this up for a **different person**? See [`CLAUDE.md`](CLAUDE.md)
+first - it's a checklist of everything specific to the original setup
+(name, bank pairing, tax assumptions) and what a new bank actually
+involves beyond new credentials.
+
 ## Setup
 
 Requires Python 3.12 (not 3.14: `yfinance`'s `curl_cffi` dependency

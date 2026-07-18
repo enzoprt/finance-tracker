@@ -157,6 +157,20 @@
   .bar-row .fill:only-child { border-radius: 4px; }
   .bar-row .value { flex: 0 0 auto; font-size: 13px; font-variant-numeric: tabular-nums; color: var(--text-primary); min-width: 64px; text-align: right; }
 
+  .cat-item { border-bottom: 1px solid var(--gridline); }
+  .cat-item:last-child { border-bottom: none; }
+  .cat-row { cursor: pointer; border-radius: 6px; }
+  .cat-row:hover, .cat-row:focus-visible { background: var(--wash); outline: none; }
+  .cat-subpanel {
+    max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.18s ease, opacity 0.15s ease;
+    padding-left: 12px; margin: 0 0 0 4px; border-left: 2px solid var(--gridline);
+  }
+  .cat-item.open .cat-subpanel { max-height: 260px; opacity: 1; margin-bottom: 6px; }
+  .cat-subrow { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; font-size: 12px; }
+  .cat-sublabel { color: var(--text-secondary); }
+  .cat-sublabel.empty { color: var(--text-muted); font-style: italic; }
+  .cat-subvalue { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+
   .legend { display: flex; flex-wrap: wrap; gap: 10px 16px; }
   .legend .item { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--text-secondary); }
   .legend .swatch { width: 10px; height: 10px; border-radius: 2px; flex: 0 0 auto; }
@@ -181,9 +195,21 @@
     border: 1px solid var(--series-1); background: var(--series-1); color: #ffffff; cursor: pointer;
   }
 
-  .transfers-toggle { display: flex; align-items: center; gap: 8px; margin: 0 0 14px; }
-  .transfers-toggle .range-picker { margin-bottom: 0; }
-  .transfers-toggle .hint { font-size: 11.5px; color: var(--text-muted); }
+  .switch-row { display: flex; flex-wrap: wrap; gap: 16px 22px; margin: 0 0 14px; }
+  .ios-switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
+  .ios-switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .ios-switch-track {
+    position: relative; flex: 0 0 auto; width: 38px; height: 22px; border-radius: 11px;
+    background: var(--gridline); transition: background 0.15s;
+  }
+  .ios-switch input:checked + .ios-switch-track { background: var(--good); }
+  .ios-switch-knob {
+    position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%;
+    background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.35); transition: transform 0.15s;
+  }
+  .ios-switch input:checked + .ios-switch-track .ios-switch-knob { transform: translateX(16px); }
+  .ios-switch input:focus-visible + .ios-switch-track { box-shadow: 0 0 0 2px var(--series-1); }
+  .ios-switch-label { font-size: 12.5px; color: var(--text-secondary); }
 
   .month-chart { display: flex; align-items: flex-end; gap: 10px; height: 130px; padding-top: 8px; }
   .month-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
@@ -197,12 +223,30 @@
   td.num { text-align: right; font-variant-numeric: tabular-nums; }
   .empty { color: var(--text-muted); font-size: 13px; font-style: italic; }
 
-  svg.linechart { width: 100%; height: 140px; overflow: visible; }
+  svg.linechart { width: 100%; height: 140px; overflow: visible; touch-action: pan-y; }
   svg.linechart .grid { stroke: var(--gridline); stroke-width: 1; }
   svg.linechart .line { fill: none; stroke: var(--series-1); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
   svg.linechart .area { fill: var(--series-1); opacity: 0.10; }
   svg.linechart .dot { fill: var(--series-1); stroke: var(--surface-1); stroke-width: 2; }
   svg.linechart text { fill: var(--text-muted); font-size: 10px; font-family: system-ui, sans-serif; }
+  svg.linechart .axis-extreme { fill: var(--text-secondary); font-weight: 500; }
+  svg.linechart .crosshair { stroke: var(--text-muted); stroke-width: 1; opacity: 0; pointer-events: none; }
+  svg.linechart .hover-dot { r: 4; stroke: var(--surface-1); stroke-width: 2; opacity: 0; pointer-events: none; }
+  svg.linechart .hover-overlay { fill: transparent; cursor: crosshair; }
+
+  .chart-wrap { position: relative; }
+  .chart-tooltip {
+    position: absolute; top: 0; pointer-events: none; opacity: 0; transform: translateX(-50%);
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px;
+    padding: 6px 10px; font-size: 11.5px; white-space: nowrap; box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+    z-index: 5; transition: opacity 0.08s;
+  }
+  .chart-tooltip.visible { opacity: 1; }
+  .chart-tooltip .tt-date { color: var(--text-muted); margin-bottom: 3px; }
+  .chart-tooltip .tt-row { display: flex; align-items: center; gap: 6px; }
+  .chart-tooltip .tt-key { width: 10px; height: 2px; flex: 0 0 auto; }
+  .chart-tooltip .tt-label { color: var(--text-secondary); }
+  .chart-tooltip .tt-value { color: var(--text-primary); font-weight: 600; font-variant-numeric: tabular-nums; margin-left: auto; padding-left: 10px; }
 
   .sparkline-list { display: flex; flex-direction: column; }
   .sparkline-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--gridline); }
@@ -270,7 +314,6 @@
   <div class="tab active" data-page="overview">Overview</div>
   <div class="tab" data-page="performance">Performance</div>
   <div class="tab" data-page="allocation">Allocation</div>
-  <div class="tab" data-page="cashflow">Cash flow</div>
   <div class="tab" data-page="budget">Budget</div>
   <div class="tab" data-page="fees">Fees &amp; FX</div>
   <div class="tab" data-page="anomalies">Anomalies</div>
@@ -280,9 +323,10 @@
 <div class="page active" id="page-overview">
   <div class="card">
     <div class="card-head"><h2>Net worth</h2><button class="info-btn" data-info="nw">i</button></div>
-    <div class="info-panel" data-info-panel="nw">Total value across Saxo, LCL, N26, and your Livrets (Livret A / Livret Jeune), converted to EUR. Livrets can't be fetched via any bank API (outside PSD2 scope) — their balance is a manual seed plus detected transfers. Saxo is valued at position-open price, not live market price — see the Allocation tab.</div>
+    <div class="info-panel" data-info-panel="nw">Total value across Saxo, LCL, N26, and your Livrets (Livret A / Livret Jeune), converted to EUR. Livrets can't be fetched via any bank API (outside PSD2 scope) — their balance is a manual seed plus detected transfers. Saxo is valued at position-open price, not live market price — see the Allocation tab. "After tax on gains" is a rough hypothetical - what you'd have left if you sold every ETF position today, assuming France's 30% flat tax (PFU) on gains (0% on positions currently at a loss, no loss-offset modeled) since the PEA/PEA-PME are both empty and everything sits in the taxable CTO. Not tax advice.</div>
     <p class="hero-value" id="net-worth-value">-</p>
     <p class="hero-sub" id="net-worth-date"></p>
+    <div class="kpi-row" id="net-worth-tax-row" style="margin-top:12px"></div>
     <div class="subhead">Over time</div>
     <div id="net-worth-chart"></div>
   </div>
@@ -323,6 +367,13 @@
     <div class="info-panel" data-info-panel="perf-holdings">Unrealized P&amp;L per position, from Saxo's own P&amp;L calculation (accurate even without a live market-data feed). Sorted worst to best — the same read used in the AI Overview's "which positions are in the red" analysis.</div>
     <div id="performance-holdings-table"></div>
   </div>
+
+  <div class="card">
+    <div class="card-head"><h2>ETF fees</h2><button class="info-btn" data-info="perf-fees">i</button></div>
+    <div class="info-panel" data-info-panel="perf-fees">Each fund's ongoing charges (TER) - deducted from the fund's own price daily by the manager, so it's already fully absorbed into every return shown on this page; you never pay it as a separate line item. This is a different thing from the Fees &amp; FX tab, which tracks real, separate, out-of-pocket broker/bank fees that are NOT absorbed anywhere. Post-tax value is a rough hypothetical - "if you sold everything today" - assuming France's 30% flat tax (PFU) on gains, since the PEA/PEA-PME are both currently empty and every position sits in the taxable account. Not tax advice; verify anything tax-sensitive independently.</div>
+    <div id="performance-fees-body"></div>
+    <div id="performance-fees-table"></div>
+  </div>
 </div>
 
 <div class="page" id="page-allocation">
@@ -350,35 +401,10 @@
   </div>
 </div>
 
-<div class="page" id="page-cashflow">
-  <div class="card">
-    <div class="card-head"><h2>Cash flow, last months</h2><button class="info-btn" data-info="cf">i</button></div>
-    <div class="info-panel" data-info-panel="cf">Income and expenses from LCL and N26. Internal transfers (e.g. towards a Livret) are excluded from both, so they don't inflate either side.</div>
-    <div id="cashflow-picker"></div>
-    <div id="cashflow-chart"></div>
-    <div class="legend" style="margin-top:10px">
-      <span class="item"><span class="swatch" style="background:var(--series-1)"></span>Income</span>
-      <span class="item"><span class="swatch" style="background:var(--series-6)"></span>Expense</span>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-head"><h2>Spending by type</h2><button class="info-btn" data-info="spend">i</button></div>
-    <div class="info-panel" data-info-panel="spend">Categorized by keyword-matching the merchant name in each transaction. Purchases that don't match a known merchant keyword fall into "other"; payments routed through PayPal show as "online_payment" since the actual merchant behind PayPal isn't visible in the bank data.</div>
-    <div id="spending-body"></div>
-  </div>
-
-  <div class="card full-width">
-    <div class="card-head"><h2>Transaction history</h2><button class="info-btn" data-info="txns">i</button></div>
-    <div class="info-panel" data-info-panel="txns">Every LCL and N26 transaction, newest first. "Bank" shows which account it's on; "Category" is the same classification used in the charts above (income, spending, fee, or internal_transfer for moves like a Livret top-up).</div>
-    <div id="transactions-table" style="max-height:420px; overflow-y:auto"></div>
-  </div>
-</div>
-
 <div class="page" id="page-budget">
   <div class="card">
     <div class="card-head"><h2>Budget</h2><button class="info-btn" data-info="bud-overview">i</button></div>
-    <div class="info-panel" data-info-panel="bud-overview">A rolling everyday spending tracker, not tied to any specific trip - pick a preset window or an exact custom range below, and every section on this tab (category breakdown, chart, monthly bars, transaction list) updates to match. Same LCL/N26 transactions as the rest of the dashboard, nothing separate to set up. Useful for daily life as much as for a specific period like the Quebec exchange. "Without transfers" (default) hides detected transfers between your own accounts (e.g. towards a Livret) so they don't inflate "Spent" - switch to "With transfers" to see gross cash movement including those.</div>
+    <div class="info-panel" data-info-panel="bud-overview">A rolling everyday spending tracker, not tied to any specific trip - pick a preset window or an exact custom range below, and every section on this tab (category breakdown, chart, monthly bars, transaction list) updates to match. Same LCL/N26 transactions as the rest of the dashboard, nothing separate to set up. Useful for daily life as much as for a specific period like the Quebec exchange. Three switches control what counts towards "Spent": Rent and Groceries are on by default (real spending); Transfers to your own accounts (e.g. towards a Livret) is off by default so shuffling your own money doesn't inflate the total.</div>
     <div id="budget-range-picker"></div>
     <div id="budget-transfers-toggle"></div>
     <div id="budget-body"></div>
@@ -386,8 +412,14 @@
 
   <div class="card">
     <div class="card-head"><h2>Spending by category</h2><button class="info-btn" data-info="bud-cat">i</button></div>
-    <div class="info-panel" data-info-panel="bud-cat">Same keyword-based categorization as Cash Flow's "Spending by type" (src/spending.py) - one shared classifier for both tabs. Extend SPENDING_KEYWORDS there as new recurring merchants show up, wherever you are.</div>
+    <div class="info-panel" data-info-panel="bud-cat">Keyword-based categorization (src/spending.py) - hover or tap a category to see its subcategory split (e.g. Transport → flights / train / public transit / gas / car rental). Extend SPENDING_KEYWORDS there as new recurring merchants show up, wherever you are.</div>
     <div id="budget-category-body"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2>Subscriptions</h2><button class="info-btn" data-info="bud-subs">i</button></div>
+    <div class="info-panel" data-info-panel="bud-subs">Every transaction classified as a subscription (streaming, software/cloud) within the selected window, grouped by merchant - so you can see exactly which subscriptions you're paying for, not just a "subscriptions" total.</div>
+    <div id="budget-subscriptions-body"></div>
   </div>
 
   <div class="card">
@@ -398,7 +430,7 @@
 
   <div class="card">
     <div class="card-head"><h2>Monthly income/expense</h2><button class="info-btn" data-info="bud-monthly">i</button></div>
-    <div class="info-panel" data-info-panel="bud-monthly">Same view as Cash Flow's monthly chart, scoped to the window selected above.</div>
+    <div class="info-panel" data-info-panel="bud-monthly">Income vs. expense per calendar month within the selected window.</div>
     <div id="budget-monthly-chart"></div>
   </div>
 
@@ -570,6 +602,117 @@ function renderSequentialBars(container, items, formatValue) {
   }
 }
 
+const CATEGORY_LABELS = {
+  housing: 'Housing', phone_internet: 'Phone & internet', groceries: 'Groceries',
+  dining: 'Dining & drinks', health: 'Health', personal_care: 'Personal care',
+  shopping: 'Shopping', subscriptions: 'Subscriptions', transport: 'Transport',
+  leisure: 'Leisure & travel', education: 'Education', gifts_donations: 'Gifts & donations',
+  admin_taxes: 'Admin & taxes', online_payment: 'Online payment (PayPal)',
+  transfer_to_own_account: 'Transfer to your own accounts', other: 'Other',
+};
+const SUBCATEGORY_LABELS = {
+  rent: 'Rent', utilities: 'Utilities', home_insurance: 'Home insurance',
+  furniture_home: 'Furniture & home goods', maintenance_repairs: 'Maintenance & repairs',
+  home_internet: 'Home internet', mobile_plan: 'Mobile plan',
+  supermarket: 'Supermarket', specialty_food: 'Specialty food',
+  fast_food: 'Fast food', restaurants: 'Restaurants', delivery: 'Delivery', cafes_bars: 'Cafes & bars',
+  health_insurance: 'Health insurance', pharmacy: 'Pharmacy', doctor_dental: 'Doctor & dental',
+  fitness_sports: 'Fitness & sports', haircut_grooming: 'Haircut & grooming', cosmetics_hygiene: 'Cosmetics & hygiene',
+  online_marketplace: 'Online marketplace', clothing: 'Clothing', electronics: 'Electronics',
+  streaming: 'Streaming', software_cloud: 'Software & cloud',
+  flights: 'Flights', train: 'Train', public_transit: 'Public transit', rideshare_taxi: 'Rideshare & taxi',
+  bike: 'Bike', parking_tolls: 'Parking & tolls', gas_fuel: 'Gas & fuel', car_rental: 'Car rental', car_insurance: 'Car insurance',
+  lodging_travel: 'Lodging & travel', events_entertainment: 'Events & entertainment', books_games: 'Books & games',
+  tuition: 'Tuition', books_supplies: 'Books & supplies', courses: 'Online courses',
+  gifts: 'Gifts', donations: 'Donations', taxes: 'Taxes', government_fees: 'Government fees', legal_notary: 'Legal & notary',
+  other: 'Other / unclassified',
+};
+
+// Hover (desktop) or tap (touch/click, which also "pins" it open so it
+// survives the mouseleave a tap fires) reveals the subcategory split for
+// that category - e.g. Transport -> flights/train/transit/gas/car rental.
+function renderCategoryBreakdown(container, byCategory, bySubcategory) {
+  container.innerHTML = '';
+  const items = Object.entries(byCategory).sort(([, a], [, b]) => b - a);
+  const max = Math.max(...items.map(([, v]) => v));
+
+  for (const [category, value] of items) {
+    const pct = max > 0 ? (value / max * 100) : 0;
+    const row = el('div', { class: 'bar-row cat-row', tabindex: '0' });
+    row.appendChild(el('div', { class: 'label', text: CATEGORY_LABELS[category] || category }));
+    const track = el('div', { class: 'track' });
+    track.appendChild(el('div', { class: 'fill', style: `width:${pct}%` }));
+    row.appendChild(track);
+    row.appendChild(el('div', { class: 'value', text: fmtEUR(value) }));
+
+    const subEntries = Object.entries(bySubcategory[category] || {}).sort(([, a], [, b]) => b - a);
+    const subPanel = el('div', { class: 'cat-subpanel' });
+    const realSubs = subEntries.filter(([sub]) => sub !== 'other' || subEntries.length === 1);
+    if (realSubs.length > 1 || (realSubs.length === 1 && realSubs[0][0] !== 'other')) {
+      for (const [sub, subValue] of subEntries) {
+        subPanel.appendChild(el('div', { class: 'cat-subrow' }, [
+          el('span', { class: 'cat-sublabel', text: SUBCATEGORY_LABELS[sub] || sub }),
+          el('span', { class: 'cat-subvalue', text: fmtEUR(subValue) }),
+        ]));
+      }
+    } else {
+      subPanel.appendChild(el('div', { class: 'cat-subrow' }, [
+        el('span', { class: 'cat-sublabel empty', text: 'No further breakdown for this category yet.' }),
+      ]));
+    }
+
+    const wrapper = el('div', { class: 'cat-item' }, [row, subPanel]);
+    let pinned = false;
+    row.addEventListener('mouseenter', () => wrapper.classList.add('open'));
+    row.addEventListener('mouseleave', () => { if (!pinned) wrapper.classList.remove('open'); });
+    row.addEventListener('click', () => {
+      pinned = !pinned;
+      wrapper.classList.toggle('open', pinned);
+    });
+    row.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); row.click(); }
+    });
+    container.appendChild(wrapper);
+  }
+}
+
+function renderSubscriptions(container, txns) {
+  container.innerHTML = '';
+  const subs = txns.filter(t => t.spending_type === 'subscriptions');
+  if (!subs.length) {
+    container.appendChild(el('p', { class: 'empty', text: 'No subscription charges detected in this range.' }));
+    return;
+  }
+
+  const byMerchant = {};
+  for (const t of subs) {
+    const name = t.spending_merchant || 'Unknown';
+    if (!byMerchant[name]) byMerchant[name] = { count: 0, total: 0, latestDate: t.date, latestAmount: -t.amount };
+    byMerchant[name].count += 1;
+    byMerchant[name].total += -t.amount;
+    if (t.date > byMerchant[name].latestDate) {
+      byMerchant[name].latestDate = t.date;
+      byMerchant[name].latestAmount = -t.amount;
+    }
+  }
+
+  const table = el('table');
+  table.appendChild(el('thead', {}, el('tr', {}, [
+    el('th', { text: 'Subscription' }), el('th', { text: 'Charges' }), el('th', { text: 'Total' }), el('th', { text: 'Latest' }),
+  ])));
+  const tbody = el('tbody');
+  for (const [name, v] of Object.entries(byMerchant).sort(([, a], [, b]) => b.total - a.total)) {
+    tbody.appendChild(el('tr', {}, [
+      el('td', { text: name }),
+      el('td', { class: 'num', text: String(v.count) }),
+      el('td', { class: 'num', text: fmtEUR2(v.total) }),
+      el('td', { class: 'num', text: `${fmtEUR2(v.latestAmount)} (${v.latestDate})` }),
+    ]));
+  }
+  table.appendChild(tbody);
+  container.appendChild(table);
+}
+
 /* ---------- Treemap (squarified) ---------- */
 function squarify(values, x0, y0, w0, h0) {
   const areaScale = (w0 * h0) / values.reduce((a, b) => a + b, 0);
@@ -702,7 +845,11 @@ function renderRangePicker(container, presets, defaultIndex, onSelect) {
 // for return/percentage series (so above/below zero is visible), wrong for
 // absolute-value series like net worth or fee totals, where it would flatten
 // real variation against a huge, meaningless gap down to 0.
-function renderMultiLineChart(container, seriesList, { includeZero = false } = {}) {
+function defaultFormatY(v) {
+  return v.toLocaleString('en-US', { maximumFractionDigits: 2 });
+}
+
+function renderMultiLineChart(container, seriesList, { includeZero = false, formatY = defaultFormatY } = {}) {
   container.innerHTML = '';
   const nonEmpty = seriesList.filter(s => s.points.length > 0);
   if (!nonEmpty.length) { container.appendChild(el('p', { class: 'empty', text: 'No data yet.' })); return; }
@@ -730,10 +877,13 @@ function renderMultiLineChart(container, seriesList, { includeZero = false } = {
   svg.appendChild(baseline);
 
   const longest = nonEmpty.reduce((a, b) => (a.points.length >= b.points.length ? a : b));
+  const xFor = s => {
+    const n = s.points.length;
+    return i => pad + (n === 1 ? (w - 2 * pad) / 2 : (i / (n - 1)) * (w - 2 * pad));
+  };
 
   for (const s of nonEmpty) {
-    const n = s.points.length;
-    const x = i => pad + (n === 1 ? (w - 2 * pad) / 2 : (i / (n - 1)) * (w - 2 * pad));
+    const x = xFor(s);
     const path = s.points.map((p, i) => `${i === 0 ? 'M' : 'L'}${x(i)},${y(p.value)}`).join(' ');
 
     const lineEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -746,6 +896,7 @@ function renderMultiLineChart(container, seriesList, { includeZero = false } = {
     if (s.dashed) lineEl.setAttribute('stroke-dasharray', '5 4');
     svg.appendChild(lineEl);
 
+    const n = s.points.length;
     const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     dot.setAttribute('cx', x(n - 1)); dot.setAttribute('cy', y(s.points[n - 1].value));
     dot.setAttribute('r', 4); dot.setAttribute('fill', s.colorVar);
@@ -762,7 +913,112 @@ function renderMultiLineChart(container, seriesList, { includeZero = false } = {
   endLabel.textContent = longest.points[longest.points.length - 1].date;
   svg.appendChild(endLabel);
 
-  container.appendChild(svg);
+  // Min/max axis labels - top-left carries the max (where the y-scale
+  // puts it), bottom-left the min, both read against the plot's own left
+  // edge so they never collide with the date row underneath.
+  const maxLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  maxLabel.setAttribute('class', 'axis-extreme');
+  maxLabel.setAttribute('x', pad); maxLabel.setAttribute('y', pad + 8); maxLabel.setAttribute('text-anchor', 'start');
+  maxLabel.textContent = formatY(max);
+  svg.appendChild(maxLabel);
+  if (max !== min) {
+    const minLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    minLabel.setAttribute('class', 'axis-extreme');
+    minLabel.setAttribute('x', pad); minLabel.setAttribute('y', h - pad - 3); minLabel.setAttribute('text-anchor', 'start');
+    minLabel.textContent = formatY(min);
+    svg.appendChild(minLabel);
+  }
+
+  // Hover/touch layer: a vertical crosshair snapped to the nearest data
+  // point, a dot per series at that point, and an HTML tooltip (date +
+  // every series' value) that follows the pointer. Pointer Events cover
+  // mouse, touch, and pen through the same handlers.
+  const crosshair = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  crosshair.setAttribute('class', 'crosshair');
+  crosshair.setAttribute('y1', 0); crosshair.setAttribute('y2', h);
+  svg.appendChild(crosshair);
+
+  const hoverDots = nonEmpty.map(s => {
+    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    dot.setAttribute('class', 'hover-dot');
+    dot.setAttribute('fill', s.colorVar);
+    svg.appendChild(dot);
+    return dot;
+  });
+
+  const wrap = el('div', { class: 'chart-wrap' });
+  wrap.appendChild(svg);
+  const tooltip = el('div', { class: 'chart-tooltip' });
+  wrap.appendChild(tooltip);
+
+  const overlay = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  overlay.setAttribute('class', 'hover-overlay');
+  overlay.setAttribute('x', 0); overlay.setAttribute('y', 0);
+  overlay.setAttribute('width', w); overlay.setAttribute('height', h + 16);
+  svg.appendChild(overlay);
+
+  function nearestPointByDate(s, targetDate) {
+    let best = s.points[0];
+    let bestDiff = Math.abs(new Date(best.date) - new Date(targetDate));
+    for (const p of s.points) {
+      const diff = Math.abs(new Date(p.date) - new Date(targetDate));
+      if (diff < bestDiff) { best = p; bestDiff = diff; }
+    }
+    return best;
+  }
+
+  function showAt(clientX) {
+    const rect = svg.getBoundingClientRect();
+    const relX = ((clientX - rect.left) / rect.width) * w;
+    const lx = xFor(longest);
+    const n = longest.points.length;
+    let idx = 0, bestDist = Infinity;
+    for (let i = 0; i < n; i++) {
+      const d = Math.abs(lx(i) - relX);
+      if (d < bestDist) { bestDist = d; idx = i; }
+    }
+    const targetDate = longest.points[idx].date;
+    const cx = lx(idx);
+
+    crosshair.setAttribute('x1', cx); crosshair.setAttribute('x2', cx);
+    crosshair.style.opacity = 1;
+
+    tooltip.innerHTML = '';
+    tooltip.appendChild(el('div', { class: 'tt-date', text: targetDate }));
+    nonEmpty.forEach((s, i) => {
+      const pt = nearestPointByDate(s, targetDate);
+      hoverDots[i].setAttribute('cx', xFor(s)(s.points.indexOf(pt)));
+      hoverDots[i].setAttribute('cy', y(pt.value));
+      hoverDots[i].style.opacity = 1;
+      const row = el('div', { class: 'tt-row' });
+      row.appendChild(el('span', { class: 'tt-key', style: `background:${s.colorVar}` }));
+      const labelSpan = document.createElement('span');
+      labelSpan.className = 'tt-label';
+      labelSpan.textContent = s.label;
+      row.appendChild(labelSpan);
+      const valueSpan = document.createElement('span');
+      valueSpan.className = 'tt-value';
+      valueSpan.textContent = formatY(pt.value);
+      row.appendChild(valueSpan);
+      tooltip.appendChild(row);
+    });
+
+    const pct = w ? (cx / w) * 100 : 50;
+    tooltip.style.left = `${Math.min(96, Math.max(4, pct))}%`;
+    tooltip.classList.add('visible');
+  }
+
+  function hide() {
+    crosshair.style.opacity = 0;
+    hoverDots.forEach(d => { d.style.opacity = 0; });
+    tooltip.classList.remove('visible');
+  }
+
+  overlay.addEventListener('pointermove', e => showAt(e.clientX));
+  overlay.addEventListener('pointerdown', e => showAt(e.clientX));
+  overlay.addEventListener('pointerleave', hide);
+
+  container.appendChild(wrap);
 
   if (nonEmpty.length > 1) {
     const legend = el('div', { class: 'legend', style: 'margin-top:10px' });
@@ -777,7 +1033,7 @@ function renderMultiLineChart(container, seriesList, { includeZero = false } = {
 }
 
 // Wires a range picker to a multi-line chart. series: same shape as renderMultiLineChart.
-function renderTimeSeriesSection(container, { series, presets, defaultIndex, granularity, includeZero = false }) {
+function renderTimeSeriesSection(container, { series, presets, defaultIndex, granularity, includeZero = false, formatY = defaultFormatY }) {
   container.innerHTML = '';
   const pickerEl = el('div');
   const chartEl = el('div');
@@ -788,7 +1044,7 @@ function renderTimeSeriesSection(container, { series, presets, defaultIndex, gra
     const filterFn = granularity === 'day'
       ? (pts => filterByDays(pts, preset.days))
       : (pts => filterByCount(pts, preset.count));
-    renderMultiLineChart(chartEl, series.map(s => ({ ...s, points: filterFn(s.points) })), { includeZero });
+    renderMultiLineChart(chartEl, series.map(s => ({ ...s, points: filterFn(s.points) })), { includeZero, formatY });
   }
 
   renderRangePicker(pickerEl, presets, defaultIndex, apply);
@@ -799,6 +1055,18 @@ function renderNetWorth() {
   const nw = SUMMARY.net_worth;
   document.getElementById('net-worth-value').textContent = fmtEUR(nw.total_eur);
   document.getElementById('net-worth-date').textContent = 'as of ' + nw.date;
+
+  const taxRow = document.getElementById('net-worth-tax-row');
+  if (nw.total_after_tax_eur != null) {
+    taxRow.appendChild(el('div', { class: 'stat-tile' }, [
+      el('div', { class: 'label', text: 'After tax on gains (est.)' }),
+      el('div', { class: 'value', text: fmtEUR(nw.total_after_tax_eur) }),
+    ]));
+    taxRow.appendChild(el('div', { class: 'stat-tile' }, [
+      el('div', { class: 'label', text: 'Est. tax owed if sold today' }),
+      el('div', { class: 'value' + (nw.estimated_tax_eur > 0 ? ' bad' : ''), text: fmtEUR(nw.estimated_tax_eur) }),
+    ]));
+  }
 
   const items = Object.entries(nw.accounts)
     .map(([label, value]) => ({ label, value }))
@@ -811,9 +1079,15 @@ function renderNetWorth() {
     chartEl.appendChild(el('p', { class: 'hero-sub', text: 'History builds up as you re-run the tracker over time.' }));
     return;
   }
+  const series = [{ label: 'Net worth', points: history.map(h => ({ date: h.date, value: h.total_eur })), colorVar: 'var(--series-1)' }];
+  const afterTaxPoints = history
+    .filter(h => h.total_after_tax_eur != null)
+    .map(h => ({ date: h.date, value: h.total_after_tax_eur }));
+  if (afterTaxPoints.length >= 2) {
+    series.push({ label: 'After tax on gains (est.)', points: afterTaxPoints, colorVar: 'var(--text-muted)', dashed: true });
+  }
   renderTimeSeriesSection(chartEl, {
-    series: [{ label: 'Net worth', points: history.map(h => ({ date: h.date, value: h.total_eur })), colorVar: 'var(--series-1)' }],
-    presets: DAY_PRESETS, defaultIndex: 4, granularity: 'day',
+    series, presets: DAY_PRESETS, defaultIndex: 4, granularity: 'day', formatY: fmtEUR,
   });
 }
 
@@ -853,6 +1127,7 @@ function renderPerformance() {
     document.getElementById('performance-monthly').appendChild(el('p', { class: 'empty', text: 'Not enough daily data points yet.' }));
     document.getElementById('performance-drawdown-chart').appendChild(el('p', { class: 'empty', text: 'Not enough daily data points yet.' }));
     renderPerformanceHoldings();
+    renderPerformanceFees();
     return;
   }
   const portfolioPoints = p.series.dates.map((d, i) => ({ date: d, value: p.series.portfolio_twr[i] }));
@@ -864,13 +1139,14 @@ function renderPerformance() {
       { label: 'Portfolio (TWR)', points: portfolioPoints, colorVar: 'var(--series-1)' },
       { label: `Benchmark (${p.benchmark.ticker})`, points: benchmarkPoints, colorVar: 'var(--text-muted)', dashed: true },
     ],
-    presets: DAY_PRESETS, defaultIndex: 4, granularity: 'day', includeZero: true,
+    presets: DAY_PRESETS, defaultIndex: 4, granularity: 'day', includeZero: true, formatY: v => fmtPct(v, 1),
   });
 
   renderPerformancePeriods(p.series);
   renderPerformanceMonthly(p.series);
   renderPerformanceDrawdown(p.series);
   renderPerformanceHoldings();
+  renderPerformanceFees();
 }
 
 function twrReturnBetween(series, fromIdx, toIdx) {
@@ -988,7 +1264,7 @@ function renderPerformanceDrawdown(series) {
 
   renderTimeSeriesSection(chartEl, {
     series: [{ label: 'Drawdown', points: ddPoints, colorVar: 'var(--series-6)' }],
-    presets: DAY_PRESETS, defaultIndex: 4, granularity: 'day', includeZero: true,
+    presets: DAY_PRESETS, defaultIndex: 4, granularity: 'day', includeZero: true, formatY: v => fmtPct(v, 1),
   });
 }
 
@@ -1016,6 +1292,56 @@ function renderPerformanceHoldings() {
   }
   table.appendChild(tbody);
   container.appendChild(table);
+}
+
+function renderPerformanceFees() {
+  const bodyEl = document.getElementById('performance-fees-body');
+  const tableEl = document.getElementById('performance-fees-table');
+  bodyEl.innerHTML = '';
+  tableEl.innerHTML = '';
+
+  const fees = SUMMARY.etf_fees;
+  if (!fees || !fees.by_fund || !fees.by_fund.length) {
+    bodyEl.appendChild(el('p', { class: 'empty', text: 'No data yet.' }));
+    return;
+  }
+
+  const row = el('div', { class: 'kpi-row' });
+  row.appendChild(el('div', { class: 'stat-tile' }, [
+    el('div', { class: 'label', text: 'Weighted avg TER' }),
+    el('div', { class: 'value', text: fees.weighted_avg_ter_pct != null ? fees.weighted_avg_ter_pct.toFixed(2) + '%' : '–' }),
+  ]));
+  row.appendChild(el('div', { class: 'stat-tile' }, [
+    el('div', { class: 'label', text: 'Annual fund cost' }),
+    el('div', { class: 'value', text: fmtEUR2(fees.annual_cost_eur) }),
+  ]));
+  row.appendChild(el('div', { class: 'stat-tile' }, [
+    el('div', { class: 'label', text: `Post-tax value (if sold today)` }),
+    el('div', { class: 'value', text: fmtEUR(fees.total_post_tax_value_eur) }),
+  ]));
+  bodyEl.appendChild(row);
+  bodyEl.appendChild(el('p', {
+    class: 'hero-sub',
+    text: `TER known for ${fees.ter_coverage_pct}% of portfolio value • post-tax assumes ${fees.flat_tax_rate_pct}% flat tax on gains, 0% on positions currently at a loss`,
+  }));
+
+  const table = el('table');
+  table.appendChild(el('thead', {}, el('tr', {}, [
+    el('th', { text: 'Fund' }), el('th', { text: 'Value' }), el('th', { text: 'TER' }),
+    el('th', { text: 'Annual cost' }), el('th', { text: 'Post-tax value' }),
+  ])));
+  const tbody = el('tbody');
+  for (const f of fees.by_fund) {
+    tbody.appendChild(el('tr', {}, [
+      el('td', { text: f.symbol + ' — ' + f.description }),
+      el('td', { class: 'num', text: fmtEUR(f.value_eur) }),
+      el('td', { class: 'num', text: f.ter_pct != null ? f.ter_pct.toFixed(2) + '%' : 'unknown' }),
+      el('td', { class: 'num', text: f.annual_cost_eur != null ? fmtEUR2(f.annual_cost_eur) : '–' }),
+      el('td', { class: 'num', text: fmtEUR(f.post_tax_value_eur) }),
+    ]));
+  }
+  table.appendChild(tbody);
+  tableEl.appendChild(table);
 }
 
 // Geography can grow an open-ended list of countries as more funds are
@@ -1141,62 +1467,6 @@ function renderAllocationHistory(container, history, key) {
   container.appendChild(el('p', { class: 'hero-sub', style: 'margin-top:10px', text: `${history[0].date} → ${history[history.length - 1].date} · each row scaled to its own range` }));
 }
 
-function renderCashflow() {
-  const cf = SUMMARY.cash_flow;
-  const allMonths = Object.entries(cf.monthly);
-  const chartEl = document.getElementById('cashflow-chart');
-  if (!allMonths.length) { chartEl.appendChild(el('p', { class: 'empty', text: 'No data yet.' })); return; }
-
-  function drawMonths(months) {
-    chartEl.innerHTML = '';
-    const max = Math.max(...months.flatMap(([, v]) => [v.income, v.expense]), 1);
-    const chart = el('div', { class: 'month-chart' });
-    for (const [month, v] of months) {
-      const col = el('div', { class: 'month-col' });
-      const bars = el('div', { class: 'month-bars' });
-      bars.appendChild(el('div', { class: 'bar', style: `height:${v.income / max * 100}px; background:var(--series-1)` }));
-      bars.appendChild(el('div', { class: 'bar', style: `height:${v.expense / max * 100}px; background:var(--series-6)` }));
-      col.appendChild(bars);
-      col.appendChild(el('div', { class: 'month-label', text: month.slice(5) + '/' + month.slice(2, 4) }));
-      chart.appendChild(col);
-    }
-    chartEl.appendChild(chart);
-  }
-  renderRangePicker(document.getElementById('cashflow-picker'), MONTH_PRESETS, 3, preset => {
-    drawMonths(filterByCount(allMonths, preset.count));
-  });
-  drawMonths(allMonths);
-
-  const spendItems = Object.entries(cf.spending_by_type).map(([label, value]) => ({ label, value }));
-  renderSequentialBars(document.getElementById('spending-body'), spendItems, fmtEUR);
-
-  renderTransactionsTable();
-}
-
-function renderTransactionsTable() {
-  const container = document.getElementById('transactions-table');
-  const txns = (SUMMARY.transactions || []).slice().sort((a, b) => b.date.localeCompare(a.date));
-  if (!txns.length) { container.appendChild(el('p', { class: 'empty', text: 'No data yet.' })); return; }
-
-  const table = el('table');
-  table.appendChild(el('thead', {}, el('tr', {}, [
-    el('th', { text: 'Date' }), el('th', { text: 'Bank' }), el('th', { text: 'Category' }),
-    el('th', { text: 'Amount' }), el('th', { text: 'Description' }),
-  ])));
-  const tbody = el('tbody');
-  for (const t of txns) {
-    tbody.appendChild(el('tr', {}, [
-      el('td', { text: t.date }),
-      el('td', { text: t.account }),
-      el('td', { text: t.category }),
-      el('td', { class: 'num', text: fmtEUR2(t.amount) }),
-      el('td', { text: t.description, style: 'white-space:normal; max-width:280px' }),
-    ]));
-  }
-  table.appendChild(tbody);
-  container.appendChild(table);
-}
-
 // A universal rolling spending tracker (not tied to any specific trip) -
 // all computation happens client-side over SUMMARY.transactions for
 // whichever window is selected, so switching ranges is instant with no
@@ -1212,6 +1482,15 @@ const BUDGET_PRESETS = [
 ];
 const BUDGET_DEFAULT_INDEX = 1;
 
+function buildSwitch(labelText, checked, onChange) {
+  const input = el('input', { type: 'checkbox' });
+  input.checked = checked;
+  const track = el('span', { class: 'ios-switch-track' }, [el('span', { class: 'ios-switch-knob' })]);
+  const label = el('label', { class: 'ios-switch' }, [input, track, el('span', { class: 'ios-switch-label', text: labelText })]);
+  input.addEventListener('change', () => onChange(input.checked));
+  return label;
+}
+
 function renderBudget() {
   const pickerEl = document.getElementById('budget-range-picker');
   const toggleEl = document.getElementById('budget-transfers-toggle');
@@ -1221,19 +1500,21 @@ function renderBudget() {
   // "internal_transfer" = detected moves between the user's own accounts
   // (e.g. towards a Livret) - excluded by default so shuffling money
   // between your own accounts doesn't read as spending, but included when
-  // the switch is on, for whoever wants to see gross cash movement.
-  const withoutTransfers = (SUMMARY.transactions || []).filter(t => t.category === 'income' || t.category === 'spending');
-  const withTransfers = (SUMMARY.transactions || []).filter(t => t.category === 'income' || t.category === 'spending' || t.category === 'internal_transfer');
-  if (!withoutTransfers.length) {
+  // its switch is on, for whoever wants to see gross cash movement.
+  const allBase = (SUMMARY.transactions || []).filter(t => t.category === 'income' || t.category === 'spending' || t.category === 'internal_transfer');
+  const nonTransferBase = allBase.filter(t => t.category !== 'internal_transfer');
+  if (!nonTransferBase.length) {
     pickerEl.appendChild(el('p', { class: 'empty', text: 'No data yet.' }));
     renderBudgetContent([], null, null);
     return;
   }
-  const sortedAll = withTransfers.slice().sort((a, b) => a.date.localeCompare(b.date));
+  const sortedAll = allBase.slice().sort((a, b) => a.date.localeCompare(b.date));
   const firstDate = sortedAll[0].date;
   const lastDate = sortedAll[sortedAll.length - 1].date;
 
   let includeTransfers = false;
+  let includeRent = true;
+  let includeGroceries = true;
   let currentStart = null;
   let currentEnd = null;
 
@@ -1253,8 +1534,10 @@ function renderBudget() {
   function applyWindow(startDate, endDate) {
     currentStart = startDate;
     currentEnd = endDate;
-    const source = includeTransfers ? withTransfers : withoutTransfers;
-    const windowTxns = source.filter(t => t.date >= startDate && t.date <= endDate);
+    let windowTxns = allBase.filter(t => t.date >= startDate && t.date <= endDate);
+    if (!includeTransfers) windowTxns = windowTxns.filter(t => t.category !== 'internal_transfer');
+    if (!includeRent) windowTxns = windowTxns.filter(t => !(t.spending_type === 'housing' && t.spending_subtype === 'rent'));
+    if (!includeGroceries) windowTxns = windowTxns.filter(t => t.spending_type !== 'groceries');
     renderBudgetContent(windowTxns, startDate, endDate);
   }
 
@@ -1288,28 +1571,11 @@ function renderBudget() {
   pickerEl.appendChild(bar);
   pickerEl.appendChild(customRow);
 
-  const transferBar = el('div', { class: 'range-picker' });
-  const withoutBtn = el('button', { class: 'range-btn active', text: 'Without transfers' });
-  const withBtn = el('button', { class: 'range-btn', text: 'With transfers' });
-  withoutBtn.addEventListener('click', () => {
-    includeTransfers = false;
-    withoutBtn.classList.add('active');
-    withBtn.classList.remove('active');
-    applyWindow(currentStart, currentEnd);
-  });
-  withBtn.addEventListener('click', () => {
-    includeTransfers = true;
-    withBtn.classList.add('active');
-    withoutBtn.classList.remove('active');
-    applyWindow(currentStart, currentEnd);
-  });
-  transferBar.appendChild(withoutBtn);
-  transferBar.appendChild(withBtn);
-  const toggleRow = el('div', { class: 'transfers-toggle' }, [
-    transferBar,
-    el('span', { class: 'hint', text: 'transfers between your own accounts (e.g. towards a Livret)' }),
-  ]);
-  toggleEl.appendChild(toggleRow);
+  const switchRow = el('div', { class: 'switch-row' });
+  switchRow.appendChild(buildSwitch('Rent', includeRent, v => { includeRent = v; applyWindow(currentStart, currentEnd); }));
+  switchRow.appendChild(buildSwitch('Groceries', includeGroceries, v => { includeGroceries = v; applyWindow(currentStart, currentEnd); }));
+  switchRow.appendChild(buildSwitch('Transfers to your own accounts', includeTransfers, v => { includeTransfers = v; applyWindow(currentStart, currentEnd); }));
+  toggleEl.appendChild(switchRow);
 
   const initial = BUDGET_PRESETS[BUDGET_DEFAULT_INDEX];
   const cutoff = new Date(lastDate + 'T00:00:00');
@@ -1320,15 +1586,16 @@ function renderBudget() {
 function renderBudgetContent(windowTxns, startDate, endDate) {
   const bodyEl = document.getElementById('budget-body');
   const catEl = document.getElementById('budget-category-body');
+  const subsEl = document.getElementById('budget-subscriptions-body');
   const netChartEl = document.getElementById('budget-net-chart');
   const monthlyChartEl = document.getElementById('budget-monthly-chart');
   const txnsEl = document.getElementById('budget-transactions-table');
-  [bodyEl, catEl, netChartEl, monthlyChartEl, txnsEl].forEach(target => { target.innerHTML = ''; });
+  [bodyEl, catEl, subsEl, netChartEl, monthlyChartEl, txnsEl].forEach(target => { target.innerHTML = ''; });
 
   const sorted = windowTxns.slice().sort((a, b) => a.date.localeCompare(b.date));
   if (!sorted.length) {
     bodyEl.appendChild(el('p', { class: 'empty', text: 'No transactions in this range.' }));
-    for (const target of [catEl, netChartEl, monthlyChartEl, txnsEl]) {
+    for (const target of [catEl, subsEl, netChartEl, monthlyChartEl, txnsEl]) {
       target.appendChild(el('p', { class: 'empty', text: 'No data yet.' }));
     }
     return;
@@ -1337,6 +1604,7 @@ function renderBudgetContent(windowTxns, startDate, endDate) {
   let totalIncome = 0;
   let running = 0;
   const byCategory = {};
+  const bySubcategory = {};
   const byMonth = {};
   const balancePoints = [];
 
@@ -1350,26 +1618,57 @@ function renderBudgetContent(windowTxns, startDate, endDate) {
     } else {
       byMonth[month].expense += -t.amount;
       const type = t.category === 'internal_transfer' ? 'transfer_to_own_account' : (t.spending_type || 'other');
+      const subtype = t.category === 'internal_transfer' ? 'other' : (t.spending_subtype || 'other');
       byCategory[type] = (byCategory[type] || 0) + -t.amount;
+      bySubcategory[type] = bySubcategory[type] || {};
+      bySubcategory[type][subtype] = (bySubcategory[type][subtype] || 0) + -t.amount;
     }
     running += t.amount;
     balancePoints.push({ date: t.date, value: Math.round(running * 100) / 100 });
   }
   const totalExpense = Object.values(byCategory).reduce((s, v) => s + v, 0);
   const days = Math.round((new Date(endDate + 'T00:00:00') - new Date(startDate + 'T00:00:00')) / 86400000) + 1;
+  const DAYS_PER_MONTH = 30.44; // 365.25 / 12 - keeps "avg monthly" stable regardless of which days the window spans
   const avgDailySpend = totalExpense / days;
+  const avgMonthlySpend = avgDailySpend * DAYS_PER_MONTH;
 
   const row = el('div', { class: 'kpi-row' });
   row.appendChild(el('div', { class: 'stat-tile' }, [el('div', { class: 'label', text: 'Spent' }), el('div', { class: 'value', text: fmtEUR(totalExpense) })]));
   row.appendChild(el('div', { class: 'stat-tile' }, [el('div', { class: 'label', text: 'Income' }), el('div', { class: 'value', text: fmtEUR(totalIncome) })]));
   row.appendChild(el('div', { class: 'stat-tile' }, [el('div', { class: 'label', text: 'Net' }), el('div', { class: 'value' + (running >= 0 ? ' good' : ' bad'), text: fmtEUR(running) })]));
   row.appendChild(el('div', { class: 'stat-tile' }, [el('div', { class: 'label', text: 'Avg daily spend' }), el('div', { class: 'value', text: fmtEUR2(avgDailySpend) })]));
+  row.appendChild(el('div', { class: 'stat-tile' }, [el('div', { class: 'label', text: 'Avg monthly spend' }), el('div', { class: 'value', text: fmtEUR(avgMonthlySpend) })]));
   bodyEl.appendChild(row);
   bodyEl.appendChild(el('p', { class: 'hero-sub', text: `${startDate} → ${endDate} • ${days} day${days === 1 ? '' : 's'}` }));
 
-  const catItems = Object.entries(byCategory).sort(([, a], [, b]) => b - a).map(([label, value]) => ({ label, value }));
-  if (catItems.length) renderSequentialBars(catEl, catItems, fmtEUR);
+  // A suggested spending ceiling, based on how much income has actually
+  // come in across ALL known history (not just this window - a short
+  // window can easily contain zero income simply because it landed
+  // outside it), minus a savings margin. A rough guideline, not a budget
+  // someone set - labeled as such in the info panel.
+  const allKnownTxns = SUMMARY.transactions || [];
+  const knownDates = allKnownTxns.map(t => t.date).sort();
+  const historyDays = knownDates.length
+    ? Math.round((new Date(knownDates[knownDates.length - 1] + 'T00:00:00') - new Date(knownDates[0] + 'T00:00:00')) / 86400000) + 1
+    : 0;
+  const totalIncomeAllTime = allKnownTxns.filter(t => t.category === 'income').reduce((s, t) => s + t.amount, 0);
+  const avgMonthlyIncome = historyDays > 0 ? (totalIncomeAllTime / historyDays) * DAYS_PER_MONTH : 0;
+  const SAVINGS_MARGIN = 0.2;
+
+  if (avgMonthlyIncome > 0) {
+    const suggestedMaxMonthly = avgMonthlyIncome * (1 - SAVINGS_MARGIN);
+    const suggestedMaxDaily = suggestedMaxMonthly / DAYS_PER_MONTH;
+    const suggestRow = el('div', { class: 'kpi-row', style: 'margin-top:10px' });
+    suggestRow.appendChild(el('div', { class: 'stat-tile' }, [el('div', { class: 'label', text: 'Suggested max/day' }), el('div', { class: 'value', text: fmtEUR2(suggestedMaxDaily) })]));
+    suggestRow.appendChild(el('div', { class: 'stat-tile' }, [el('div', { class: 'label', text: 'Suggested max/month' }), el('div', { class: 'value', text: fmtEUR(suggestedMaxMonthly) })]));
+    bodyEl.appendChild(suggestRow);
+    bodyEl.appendChild(el('p', { class: 'hero-sub', style: 'margin-top:4px', text: `Based on your average income across all known history (${fmtEUR(avgMonthlyIncome)}/month), keeping a ${Math.round(SAVINGS_MARGIN * 100)}% margin - a rough guideline, not a plan you set.` }));
+  }
+
+  if (Object.keys(byCategory).length) renderCategoryBreakdown(catEl, byCategory, bySubcategory);
   else catEl.appendChild(el('p', { class: 'empty', text: 'No spending in this range.' }));
+
+  renderSubscriptions(subsEl, sorted);
 
   const months = Object.entries(byMonth).sort(([a], [b]) => a.localeCompare(b));
   const max = Math.max(...months.flatMap(([, v]) => [v.income, v.expense]), 1);
@@ -1390,7 +1689,7 @@ function renderBudgetContent(windowTxns, startDate, endDate) {
   ]));
 
   if (balancePoints.length >= 2) {
-    renderMultiLineChart(netChartEl, [{ label: 'Net position', points: balancePoints, colorVar: 'var(--series-1)' }], { includeZero: true });
+    renderMultiLineChart(netChartEl, [{ label: 'Net position', points: balancePoints, colorVar: 'var(--series-1)' }], { includeZero: true, formatY: fmtEUR });
   } else {
     netChartEl.appendChild(el('p', { class: 'empty', text: 'Not enough transactions in this range for a chart.' }));
   }
@@ -1426,7 +1725,7 @@ function renderFees() {
   } else {
     renderTimeSeriesSection(chartEl, {
       series: [{ label: 'Fees', points: feeMonths.map(([m, v]) => ({ date: m + '-01', value: v })), colorVar: 'var(--series-6)' }],
-      presets: MONTH_PRESETS, defaultIndex: 3, granularity: 'month',
+      presets: MONTH_PRESETS, defaultIndex: 3, granularity: 'month', formatY: fmtEUR2,
     });
   }
 }
@@ -1470,7 +1769,7 @@ function renderFxCost() {
     const points = months.map(([m, vals]) => ({ date: m + '-01', value: vals.reduce((s, v) => s + v, 0) / vals.length }));
     renderTimeSeriesSection(chartEl, {
       series: [{ label: 'Avg markup', points, colorVar: 'var(--series-3)' }],
-      presets: MONTH_PRESETS, defaultIndex: 3, granularity: 'month',
+      presets: MONTH_PRESETS, defaultIndex: 3, granularity: 'month', formatY: v => v.toFixed(2) + '%',
     });
   }
 }
@@ -1499,7 +1798,6 @@ document.getElementById('generated').textContent = 'Generated ' + new Date(SUMMA
 renderNetWorth();
 renderPerformance();
 renderAllocation();
-renderCashflow();
 renderBudget();
 renderFees();
 renderFxCost();
