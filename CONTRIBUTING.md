@@ -53,10 +53,11 @@ time, not a company:
   bundled into a feature PR.
 - **Watch for keyword collisions** if you're touching `src/spending.py`'s
   classifier - short substrings can match inside unrelated words (real
-  examples that shipped and got caught: `"MAXI"` matched inside the name
-  "Maxime", `"BUT"` matched inside "début", `"APPLE "` matched inside
-  "pineapple"). Grep real transaction descriptions plus a few adversarial
-  strings before trusting a new short keyword.
+  examples that shipped and got caught: `"MAXI"` matched inside a common
+  first name in a transfer description, `"BUT"` matched inside "début",
+  `"APPLE "` matched inside "pineapple"). Grep real transaction
+  descriptions plus a few adversarial strings before trusting a new short
+  keyword.
 - **Verify your change actually renders**, not just that it type-checks.
   There's no automated test suite yet - screenshot or otherwise visually
   confirm dashboard changes work (a fully synthetic `data/summary.json` is

@@ -62,7 +62,7 @@ SPENDING_KEYWORDS: Tuple[Tuple[str, str, str], ...] = (
     ("METRO", "groceries", "supermarket"),
     ("PROVIGO", "groceries", "supermarket"),
     ("SUPERC", "groceries", "supermarket"),
-    ("MAXI ", "groceries", "supermarket"),  # trailing space avoids matching "Maxime" in a name
+    ("MAXI ", "groceries", "supermarket"),  # trailing space avoids matching common first names ending in "-maxi" (e.g. transfer descriptions)
     ("COSTCO", "groceries", "supermarket"),
     ("NETTO ", "groceries", "supermarket"),  # trailing space avoids matching "nettoyage"
     ("FOETEX", "groceries", "supermarket"),

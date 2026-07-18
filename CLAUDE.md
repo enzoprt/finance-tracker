@@ -167,10 +167,11 @@ credentials. Concretely:
   Budget tab's category breakdown) rather than trying to guess a new
   country's merchants upfront. Watch for substring collisions when adding
   short keywords (documented inline where it bit before: `"MAXI"` matched
-  inside the name "Maxime", `"BUT"` matched inside "début", `"APPLE "`
-  matched inside "pineapple" - anchor short/generic keywords with leading
-  AND trailing spaces, and grep real transaction descriptions plus a
-  handful of adversarial strings before trusting a new short keyword).
+  inside a common first name in a transfer description, `"BUT"` matched
+  inside "début", `"APPLE "` matched inside "pineapple" - anchor
+  short/generic keywords with leading AND trailing spaces, and grep real
+  transaction descriptions plus a handful of adversarial strings before
+  trusting a new short keyword).
   `MERCHANT_LABELS` (the display-name cleanup dict used by the
   Subscriptions card) is generic/international and needs no changes.
 - **`src/model.py`**'s `Transaction.account` docstring comment
