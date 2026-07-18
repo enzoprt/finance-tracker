@@ -11,6 +11,44 @@ first - it's a checklist of everything specific to the original setup
 (name, bank pairing, tax assumptions) and what a new bank actually
 involves beyond new credentials.
 
+## Screenshots
+
+Sample data throughout - fake name, fake amounts, fake transaction
+history (real ETF tickers, since those are public products, not personal
+data). Nothing here is anyone's real finances.
+
+**Overview** - net worth, split by account, after an estimated tax on
+unrealized gains.
+
+![Overview tab](docs/screenshots/01-overview.png)
+
+**Performance** - XIRR/TWR vs. a benchmark, rolling returns, drawdown,
+per-holding P&L, and each fund's ongoing charges (TER) with a rough
+post-tax value.
+
+![Performance tab](docs/screenshots/02-performance.png)
+
+**Allocation** - real look-through geography and sector exposure
+(weighted by each fund's actual holdings, not name-guessing), with
+history sparklines per category.
+
+![Allocation tab](docs/screenshots/03-allocation.png)
+
+**Budget** - a rolling spending tracker with a custom date range,
+category/subcategory breakdown, detected subscriptions, and switches to
+include or exclude rent, groceries, or transfers between your own
+accounts from the totals.
+
+![Budget tab](docs/screenshots/04-budget.png)
+
+**AI Overview** - a hand-written analysis tab (not computed), asking
+Claude to read the real data and give an opinion on what's been done and
+what to consider changing. Shown here is the generic placeholder that
+ships in the repo; see the section below for how it actually gets
+written.
+
+![AI Overview tab](docs/screenshots/05-ai-overview.png)
+
 ## Setup
 
 Requires Python 3.12 (not 3.14: `yfinance`'s `curl_cffi` dependency
